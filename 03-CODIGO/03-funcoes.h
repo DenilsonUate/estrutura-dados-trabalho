@@ -2,6 +2,7 @@
  * SISTEMA DE REGISTO DE ESTUDANTES COM TABELA HASH
  * Elaborado por Denilson - Commit 1
  * Acrescentado por Ludovina - Commit 2 (Validações e Interface)
+ * Acrescentado por Frederico - Commit 3 (Inserção no Menu)
  */
 
 #include <stdio.h>
@@ -53,6 +54,14 @@ void lerString(char destino[], int tamanho, char mensagem[]);
 void exibirSubMenu(char titulo[]);
 
 // ------------------------
+// Protótipos adicionados por Frederico
+// ------------------------
+// Acrescentado por Frederico
+void inserirEstudante();
+void lerDadosEstudante(int *numero, char nome[], char curso[]);
+void menuInserir();
+
+// ------------------------
 // Função main - Menu principal
 // ------------------------
 // Elaborado por Denilson
@@ -68,6 +77,7 @@ int main() {
     printf("============================================\n");
     printf("   Elaborado por Denilson (Commit 1)\n");
     printf("   Acrescentado por Ludovina (Commit 2)\n");
+    printf("   Acrescentado por Frederico (Commit 3)\n");
     printf("============================================\n\n");
     
     do {
@@ -78,9 +88,7 @@ int main() {
         
         switch(opcao) {
             case 1:
-                printf("\n--- INSERIR ESTUDANTE ---\n");
-                printf("Funcionalidade em desenvolvimento...\n");
-                pausar();
+                menuInserir();
                 break;
                 
             case 2:
@@ -108,6 +116,126 @@ int main() {
     } while(opcao != 0);
     
     return 0;
+}
+
+// ------------------------
+// Menu de inserção de estudante
+// ------------------------
+// Acrescentado por Frederico
+void menuInserir() {
+    int opcao;
+    
+    do {
+        exibirSubMenu("INSERIR ESTUDANTE");
+        scanf("%d", &opcao);
+        limparBuffer();
+        
+        switch(opcao) {
+            case 1:
+                printf("\n--- Inserir via Encadeamento ---\n");
+                inserirEstudante();
+                printf("(Lógica de encadeamento será implementada no próximo commit)\n");
+                pausar();
+                break;
+                
+            case 2:
+                printf("\n--- Inserir via Sondagem Linear ---\n");
+                inserirEstudante();
+                printf("(Lógica de sondagem linear será implementada no próximo commit)\n");
+                pausar();
+                break;
+                
+            case 0:
+                printf("Voltando ao menu principal...\n");
+                break;
+                
+            default:
+                printf("Opcao invalida!\n");
+                pausar();
+        }
+    } while(opcao != 0);
+}
+
+// ------------------------
+// Ler dados do estudante com validações
+// ------------------------
+// Acrescentado por Frederico
+void lerDadosEstudante(int *numero, char nome[], char curso[]) {
+    char numStr[MAX_STR];
+    int valido;
+    
+    printf("\n--- Dados do Estudante ---\n");
+    
+    // Ler número (apenas dígitos)
+    do {
+        lerString(numStr, MAX_STR, "Numero do estudante (apenas digitos): ");
+        valido = 1;
+        
+        if(validarCampoVazio(numStr)) {
+            printf("Erro: Campo vazio! Digite novamente.\n");
+            valido = 0;
+        }
+        else if(!validarApenasDigitos(numStr)) {
+            printf("Erro: Apenas numeros sao permitidos!\n");
+            valido = 0;
+        }
+        
+    } while(!valido);
+    
+    *numero = atoi(numStr);
+    
+    // Ler nome (apenas letras e espaços)
+    do {
+        lerString(nome, MAX_NOME, "Nome do estudante (apenas letras): ");
+        valido = 1;
+        
+        if(validarCampoVazio(nome)) {
+            printf("Erro: Campo vazio! Digite novamente.\n");
+            valido = 0;
+        }
+        else if(!validarApenasLetras(nome)) {
+            printf("Erro: Apenas letras e espacos sao permitidos!\n");
+            valido = 0;
+        }
+        
+    } while(!valido);
+    
+    // Ler curso (apenas letras e espaços)
+    do {
+        lerString(curso, MAX_CURSO, "Curso do estudante (apenas letras): ");
+        valido = 1;
+        
+        if(validarCampoVazio(curso)) {
+            printf("Erro: Campo vazio! Digite novamente.\n");
+            valido = 0;
+        }
+        else if(!validarApenasLetras(curso)) {
+            printf("Erro: Apenas letras e espacos sao permitidos!\n");
+            valido = 0;
+        }
+        
+    } while(!valido);
+    
+    printf("\nDados lidos com sucesso!\n");
+    printf("Numero: %d\n", *numero);
+    printf("Nome: %s\n", nome);
+    printf("Curso: %s\n", curso);
+}
+
+// ------------------------
+// Função placeholder para inserir estudante
+// ------------------------
+// Acrescentado por Frederico
+void inserirEstudante() {
+    int numero;
+    char nome[MAX_NOME];
+    char curso[MAX_CURSO];
+    
+    lerDadosEstudante(&numero, nome, curso);
+    
+    // Por enquanto apenas mostra os dados
+    // A lógica real de inserção virá nos próximos commits
+    printf("\n[Dados prontos para inserir na tabela]\n");
 }
 
 // ------------------------
