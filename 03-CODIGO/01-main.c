@@ -1,9 +1,8 @@
 /*
  * SISTEMA DE REGISTO DE ESTUDANTES COM TABELA HASH
- * Elaborado por Denilson
- * 
- * Este é o commit inicial que estabelece a estrutura base do sistema
- * com as duas tabelas hash (encadeamento e sondagem linear)
+ * Elaborado por Denilson - Commit 1
+ * Acrescentado por Ludovina - Commit 2 (Validações e Interface)
+ * Acrescentado por Frederico - Commit 3 (Inserção no Menu)
  */
 
 #include <stdio.h>
@@ -45,6 +44,24 @@ void limparBuffer();
 void pausar();
 
 // ------------------------
+// Protótipos adicionados por Ludovina
+// ------------------------
+// Acrescentado por Ludovina
+int validarApenasDigitos(char str[]);
+int validarApenasLetras(char str[]);
+int validarCampoVazio(char str[]);
+void lerString(char destino[], int tamanho, char mensagem[]);
+void exibirSubMenu(char titulo[]);
+
+// ------------------------
+// Protótipos adicionados por Frederico
+// ------------------------
+// Acrescentado por Frederico
+void inserirEstudante();
+void lerDadosEstudante(int *numero, char nome[], char curso[]);
+void menuInserir();
+
+// ------------------------
 // Função main - Menu principal
 // ------------------------
 // Elaborado por Denilson
@@ -58,7 +75,9 @@ int main() {
     printf("   SISTEMA DE REGISTO DE ESTUDANTES\n");
     printf("   Com Tabela Hash (Encadeamento e Linear)\n");
     printf("============================================\n");
-    printf("   Elaborado por Denilson - Commit 1\n");
+    printf("   Elaborado por Denilson (Commit 1)\n");
+    printf("   Acrescentado por Ludovina (Commit 2)\n");
+    printf("   Acrescentado por Frederico (Commit 3)\n");
     printf("============================================\n\n");
     
     do {
@@ -69,9 +88,7 @@ int main() {
         
         switch(opcao) {
             case 1:
-                printf("\n--- INSERIR ESTUDANTE ---\n");
-                printf("Funcionalidade em desenvolvimento...\n");
-                pausar();
+                menuInserir();
                 break;
                 
             case 2:
@@ -102,6 +119,126 @@ int main() {
 }
 
 // ------------------------
+// Menu de inserção de estudante
+// ------------------------
+// Acrescentado por Frederico
+void menuInserir() {
+    int opcao;
+    
+    do {
+        exibirSubMenu("INSERIR ESTUDANTE");
+        scanf("%d", &opcao);
+        limparBuffer();
+        
+        switch(opcao) {
+            case 1:
+                printf("\n--- Inserir via Encadeamento ---\n");
+                inserirEstudante();
+                printf("(Lógica de encadeamento será implementada no próximo commit)\n");
+                pausar();
+                break;
+                
+            case 2:
+                printf("\n--- Inserir via Sondagem Linear ---\n");
+                inserirEstudante();
+                printf("(Lógica de sondagem linear será implementada no próximo commit)\n");
+                pausar();
+                break;
+                
+            case 0:
+                printf("Voltando ao menu principal...\n");
+                break;
+                
+            default:
+                printf("Opcao invalida!\n");
+                pausar();
+        }
+    } while(opcao != 0);
+}
+
+// ------------------------
+// Ler dados do estudante com validações
+// ------------------------
+// Acrescentado por Frederico
+void lerDadosEstudante(int *numero, char nome[], char curso[]) {
+    char numStr[MAX_STR];
+    int valido;
+    
+    printf("\n--- Dados do Estudante ---\n");
+    
+    // Ler número (apenas dígitos)
+    do {
+        lerString(numStr, MAX_STR, "Numero do estudante (apenas digitos): ");
+        valido = 1;
+        
+        if(validarCampoVazio(numStr)) {
+            printf("Erro: Campo vazio! Digite novamente.\n");
+            valido = 0;
+        }
+        else if(!validarApenasDigitos(numStr)) {
+            printf("Erro: Apenas numeros sao permitidos!\n");
+            valido = 0;
+        }
+        
+    } while(!valido);
+    
+    *numero = atoi(numStr);
+    
+    // Ler nome (apenas letras e espaços)
+    do {
+        lerString(nome, MAX_NOME, "Nome do estudante (apenas letras): ");
+        valido = 1;
+        
+        if(validarCampoVazio(nome)) {
+            printf("Erro: Campo vazio! Digite novamente.\n");
+            valido = 0;
+        }
+        else if(!validarApenasLetras(nome)) {
+            printf("Erro: Apenas letras e espacos sao permitidos!\n");
+            valido = 0;
+        }
+        
+    } while(!valido);
+    
+    // Ler curso (apenas letras e espaços)
+    do {
+        lerString(curso, MAX_CURSO, "Curso do estudante (apenas letras): ");
+        valido = 1;
+        
+        if(validarCampoVazio(curso)) {
+            printf("Erro: Campo vazio! Digite novamente.\n");
+            valido = 0;
+        }
+        else if(!validarApenasLetras(curso)) {
+            printf("Erro: Apenas letras e espacos sao permitidos!\n");
+            valido = 0;
+        }
+        
+    } while(!valido);
+    
+    printf("\nDados lidos com sucesso!\n");
+    printf("Numero: %d\n", *numero);
+    printf("Nome: %s\n", nome);
+    printf("Curso: %s\n", curso);
+}
+
+// ------------------------
+// Função placeholder para inserir estudante
+// ------------------------
+// Acrescentado por Frederico
+void inserirEstudante() {
+    int numero;
+    char nome[MAX_NOME];
+    char curso[MAX_CURSO];
+    
+    lerDadosEstudante(&numero, nome, curso);
+    
+    // Por enquanto apenas mostra os dados
+    // A lógica real de inserção virá nos próximos commits
+    printf("\n[Dados prontos para inserir na tabela]\n");
+}
+
+// ------------------------
 // Inicializar as tabelas hash
 // ------------------------
 // Elaborado por Denilson
@@ -116,7 +253,7 @@ void inicializarTabelas() {
         tabelaLinear[i].numero = -1;
         strcpy(tabelaLinear[i].nome, "");
         strcpy(tabelaLinear[i].curso, "");
-        tabelaLinear[i].prox = NULL;  // Não usado na linear, mas por segurança
+        tabelaLinear[i].prox = NULL;
     }
     
     printf("Tabelas hash inicializadas com sucesso!\n");
@@ -143,6 +280,70 @@ void exibirMenuPrincipal() {
     printf("3 - Remover Estudante\n");
     printf("0 - Sair\n");
     printf("--------------------------------------------\n");
+}
+
+// ------------------------
+// Exibir submenu (adicionado por Ludovina)
+// ------------------------
+// Acrescentado por Ludovina
+void exibirSubMenu(char titulo[]) {
+    printf("\n--------------------------------------------\n");
+    printf("%s\n", titulo);
+    printf("--------------------------------------------\n");
+    printf("1 - Encadeamento (Lista Locada)\n");
+    printf("2 - Sondagem Linear\n");
+    printf("0 - Voltar\n");
+    printf("--------------------------------------------\n");
+    printf("Escolha: ");
+}
+
+// ------------------------
+// Validar se string contém apenas dígitos
+// ------------------------
+// Acrescentado por Ludovina
+int validarApenasDigitos(char str[]) {
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(!isdigit(str[i])) {
+            return 0;  // Não é dígito
+        }
+    }
+    return 1;  // São apenas dígitos
+}
+
+// ------------------------
+// Validar se string contém apenas letras e espaços
+// ------------------------
+// Acrescentado por Ludovina
+int validarApenasLetras(char str[]) {
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(!isalpha(str[i]) && str[i] != ' ') {
+            return 0;  // Não é letra nem espaço
+        }
+    }
+    return 1;  // São apenas letras e espaços
+}
+
+// ------------------------
+// Validar se campo não está vazio
+// ------------------------
+// Acrescentado por Ludovina
+int validarCampoVazio(char str[]) {
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(str[i] != ' ' && str[i] != '\n' && str[i] != '\t') {
+            return 0;  // Tem caracteres não vazios
+        }
+    }
+    return 1;  // Está vazio
+}
+
+// ------------------------
+// Ler string com validação simples
+// ------------------------
+// Acrescentado por Ludovina
+void lerString(char destino[], int tamanho, char mensagem[]) {
+    printf("%s", mensagem);
+    fgets(destino, tamanho, stdin);
+    destino[strcspn(destino, "\n")] = 0;  // Remover o \n
 }
 
 // ------------------------
