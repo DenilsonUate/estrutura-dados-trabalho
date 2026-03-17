@@ -6,6 +6,7 @@
  * Acrescentado por Denilson - Commit 4 (Insercao Encadeamento)
  * Acrescentado por Ludovina - Commit 5 (Insercao Linear)
  * Acrescentado por Frederico - Commit 6 (Exibicao das Tabelas)
+ * Acrescentado por Denilson - Commit 7 (Busca Interativa)
  */
 
 #include <stdio.h>
@@ -87,6 +88,16 @@ void exibirTodasTabelas();
 void desenharLinha(int tamanho);
 
 // ------------------------
+// Prototipos adicionados por Denilson (Commit 7)
+// ------------------------
+// Acrescentado por Denilson
+void menuProcurar();
+void procurarEncadeamento();
+void procurarLinear();
+void listarAlunosIndiceEncadeamento(int indice);
+void mostrarAlunoIndiceLinear(int indice);
+
+// ------------------------
 // Funcao main - Menu principal
 // ------------------------
 // Elaborado por Denilson
@@ -106,6 +117,7 @@ int main() {
     printf("   Acrescentado por Denilson (Commit 4)\n");
     printf("   Acrescentado por Ludovina (Commit 5)\n");
     printf("   Acrescentado por Frederico (Commit 6)\n");
+    printf("   Acrescentado por Denilson (Commit 7)\n");
     printf("============================================\n\n");
     
     do {
@@ -121,9 +133,7 @@ int main() {
                 break;
                 
             case 2:
-                printf("\n--- PROCURAR ESTUDANTE ---\n");
-                printf("Funcionalidade em desenvolvimento...\n");
-                pausar();
+                menuProcurar();
                 break;
                 
             case 3:
@@ -145,6 +155,163 @@ int main() {
     } while(opcao != 0);
     
     return 0;
+}
+
+// ------------------------
+// Menu de procura de estudante
+// ------------------------
+// Acrescentado por Denilson
+void menuProcurar() {
+    int opcao;
+    
+    do {
+        exibirSubMenu("PROCURAR ESTUDANTE");
+        scanf("%d", &opcao);
+        limparBuffer();
+        
+        switch(opcao) {
+            case 1:
+                printf("\n--- Busca por Encadeamento ---\n");
+                procurarEncadeamento();
+                pausar();
+                break;
+                
+            case 2:
+                printf("\n--- Busca por Sondagem Linear ---\n");
+                procurarLinear();
+                pausar();
+                break;
+                
+            case 0:
+                printf("Voltando ao menu principal...\n");
+                break;
+                
+            default:
+                printf("Opcao invalida!\n");
+                pausar();
+        }
+    } while(opcao != 0);
+}
+
+// ------------------------
+// Procurar estudante na tabela de encadeamento
+// ------------------------
+// Acrescentado por Denilson
+void procurarEncadeamento() {
+    int indice;
+    char indiceStr[MAX_STR];
+    
+    // Mostrar tabela atual
+    exibirTabelaEncadeamento();
+    
+    // Pedir indice para busca
+    printf("\n--- Busca por Encadeamento ---\n");
+    printf("Digite o indice que deseja consultar (0 a %d): ", TAM-1);
+    
+    do {
+        lerString(indiceStr, MAX_STR, "");
+        if(!validarApenasDigitos(indiceStr)) {
+            printf("Erro: Digite apenas numeros! Tente novamente: ");
+        }
+    } while(!validarApenasDigitos(indiceStr));
+    
+    indice = atoi(indiceStr);
+    
+    if(indice < 0 || indice >= TAM) {
+        printf("Indice invalido! Deve ser entre 0 e %d.\n", TAM-1);
+        return;
+    }
+    
+    // Listar alunos do indice escolhido
+    listarAlunosIndiceEncadeamento(indice);
+}
+
+// ------------------------
+// Listar todos os alunos de um indice na tabela de encadeamento
+// ------------------------
+// Acrescentado por Denilson
+void listarAlunosIndiceEncadeamento(int indice) {
+    printf("\n--- Alunos no indice %d (Encadeamento) ---\n", indice);
+    
+    if(tabelaEncadeamento[indice] == NULL) {
+        printf("Nenhum aluno encontrado neste indice.\n");
+        return;
+    }
+    
+    Estudante* temp = tabelaEncadeamento[indice];
+    int cont = 1;
+    
+    printf("Total de alunos neste indice: (lista locada)\n");
+    desenharLinha(50);
+    
+    while(temp != NULL) {
+        printf("Aluno %d:\n", cont);
+        printf("  Numero: %d\n", temp->numero);
+        printf("  Nome: %s\n", temp->nome);
+        printf("  Curso: %s\n", temp->curso);
+        desenharLinha(30);
+        
+        temp = temp->prox;
+        cont++;
+    }
+}
+
+// ------------------------
+// Procurar estudante na tabela de sondagem linear
+// ------------------------
+// Acrescentado por Denilson
+void procurarLinear() {
+    int indice;
+    char indiceStr[MAX_STR];
+    
+    // Mostrar tabela atual
+    exibirTabelaLinear();
+    
+    // Pedir indice para busca
+    printf("\n--- Busca por Sondagem Linear ---\n");
+    printf("Digite o indice que deseja consultar (0 a %d): ", TAM-1);
+    
+    do {
+        lerString(indiceStr, MAX_STR, "");
+        if(!validarApenasDigitos(indiceStr)) {
+            printf("Erro: Digite apenas numeros! Tente novamente: ");
+        }
+    } while(!validarApenasDigitos(indiceStr));
+    
+    indice = atoi(indiceStr);
+    
+    if(indice < 0 || indice >= TAM) {
+        printf("Indice invalido! Deve ser entre 0 e %d.\n", TAM-1);
+        return;
+    }
+    
+    // Mostrar aluno do indice escolhido
+    mostrarAlunoIndiceLinear(indice);
+}
+
+// ------------------------
+// Mostrar aluno de um indice na tabela linear
+// ------------------------
+// Acrescentado por Denilson
+void mostrarAlunoIndiceLinear(int indice) {
+    printf("\n--- Aluno no indice %d (Sondagem Linear) ---\n", indice);
+    
+    if(tabelaLinear[indice].numero == -1) {
+        printf("Nenhum aluno encontrado neste indice.\n");
+        return;
+    }
+    
+    printf("Numero: %d\n", tabelaLinear[indice].numero);
+    printf("Nome: %s\n", tabelaLinear[indice].nome);
+    printf("Curso: %s\n", tabelaLinear[indice].curso);
+    
+    // Verificar se houve colisao (indice diferente do calculado)
+    int indiceOriginal = funcaoHash(tabelaLinear[indice].numero);
+    if(indiceOriginal != indice) {
+        printf("\n(Observacao: Este aluno sofreu colisao na insercao.\n");
+        printf("Indice original calculado: %d\n", indiceOriginal);
+        printf("Indice real apos sondagem: %d)\n", indice);
+    }
 }
 
 // ------------------------
