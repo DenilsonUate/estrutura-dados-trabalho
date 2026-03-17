@@ -10,6 +10,7 @@
  * Acrescentado por Denilson - Commit 8 (Persistencia em Arquivo)
  * Acrescentado por Frederico - Commit 9 (Remocao Interativa)
  * Acrescentado por Denilson - Commit 10 (Remocao Sincronizada)
+ * Acrescentado por Denilson - Commit 11 (Normalizacao de Texto)
  */
 
 #include <stdio.h>
@@ -135,6 +136,15 @@ void removerDaTabelaLinear(int numero);
 int encontrarIndiceLinearPorNumero(int numero);
 
 // ------------------------
+// Prototipos adicionados por Denilson (Commit 11)
+// ------------------------
+// Acrescentado por Denilson
+void converterParaMinusculas(char str[]);
+int verificarEstudanteDuplicado(int numero, char nome[], char curso[]);
+int compararNomesIgnorandoMaiusculas(char str1[], char str2[]);
+int compararCursosIgnorandoMaiusculas(char str1[], char str2[]);
+
+// ------------------------
 // Funcao main - Menu principal
 // ------------------------
 // Elaborado por Denilson
@@ -161,6 +171,7 @@ int main() {
     printf("   Acrescentado por Denilson (Commit 8)\n");
     printf("   Acrescentado por Frederico (Commit 9)\n");
     printf("   Acrescentado por Denilson (Commit 10)\n");
+    printf("   Acrescentado por Denilson (Commit 11 - Normalizacao)\n");
     printf("============================================\n\n");
     
     do {
@@ -203,129 +214,149 @@ int main() {
 }
 
 // ------------------------
-// Remover estudante de ambas as tabelas
+// Converter string para minusculas
 // ------------------------
 // Acrescentado por Denilson
-void removerDeAmbasTabelas(int numero) {
-    printf("\n--- Removendo de ambas as tabelas ---\n");
-    
-    // Remover da tabela de encadeamento
-    removerDaTabelaEncadeamento(numero);
-    
-    // Remover da tabela linear
-    removerDaTabelaLinear(numero);
-    
-    printf("Estudante removido das duas tabelas com sucesso!\n");
+void converterParaMinusculas(char str[]) {
+    for(int i = 0; str[i] != '\0'; i++) {
+        str[i] = tolower(str[i]);
+    }
 }
 
 // ------------------------
-// Remover estudante da tabela de encadeamento por numero
+// Comparar duas strings ignorando maiusculas/minusculas
 // ------------------------
 // Acrescentado por Denilson
-void removerDaTabelaEncadeamento(int numero) {
+int compararNomesIgnorandoMaiusculas(char str1[], char str2[]) {
+    char temp1[MAX_NOME], temp2[MAX_NOME];
+    
+    strcpy(temp1, str1);
+    strcpy(temp2, str2);
+    
+    converterParaMinusculas(temp1);
+    converterParaMinusculas(temp2);
+    
+    return strcmp(temp1, temp2);
+}
+
+// ------------------------
+// Comparar dois cursos ignorando maiusculas/minusculas
+// ------------------------
+// Acrescentado por Denilson
+int compararCursosIgnorandoMaiusculas(char str1[], char str2[]) {
+    char temp1[MAX_CURSO], temp2[MAX_CURSO];
+    
+    strcpy(temp1, str1);
+    strcpy(temp2, str2);
+    
+    converterParaMinusculas(temp1);
+    converterParaMinusculas(temp2);
+    
+    return strcmp(temp1, temp2);
+}
+
+// ------------------------
+// Verificar se estudante ja existe nas tabelas
+// ------------------------
+// Acrescentado por Denilson
+int verificarEstudanteDuplicado(int numero, char nome[], char curso[]) {
     int indice = funcaoHash(numero);
-    Estudante* temp = tabelaEncadeamento[indice];
-    Estudante* ant = NULL;
     int encontrado = 0;
     
+    // Converter para minusculas para comparacao
+    char nomeMinusculo[MAX_NOME];
+    char cursoMinusculo[MAX_CURSO];
+    strcpy(nomeMinusculo, nome);
+    strcpy(cursoMinusculo, curso);
+    converterParaMinusculas(nomeMinusculo);
+    converterParaMinusculas(cursoMinusculo);
+    
+    // Verificar na tabela de encadeamento
+    Estudante* temp = tabelaEncadeamento[indice];
     while(temp != NULL) {
         if(temp->numero == numero) {
-            encontrado = 1;
-            if(ant == NULL) {
-                tabelaEncadeamento[indice] = temp->prox;
-            } else {
-                ant->prox = temp->prox;
+            char tempNomeMinusculo[MAX_NOME];
+            char tempCursoMinusculo[MAX_CURSO];
+            strcpy(tempNomeMinusculo, temp->nome);
+            strcpy(tempCursoMinusculo, temp->curso);
+            converterParaMinusculas(tempNomeMinusculo);
+            converterParaMinusculas(tempCursoMinusculo);
+            
+            if(strcmp(tempNomeMinusculo, nomeMinusculo) == 0 && 
+               strcmp(tempCursoMinusculo, cursoMinusculo) == 0) {
+                printf("\n!!! ESTUDANTE DUPLICADO DETECTADO !!!\n");
+                printf("Ja existe um estudante com:\n");
+                printf("  Numero: %d\n", temp->numero);
+                printf("  Nome: %s\n", temp->nome);
+                printf("  Curso: %s\n", temp->curso);
+                printf("Insercao cancelada para evitar duplicacao.\n");
+                return 1;
             }
-            free(temp);
-            printf("  • Removido da tabela de encadeamento (indice %d)\n", indice);
-            break;
         }
-        ant = temp;
         temp = temp->prox;
     }
     
-    if(!encontrado) {
-        printf("  • Estudante nao encontrado na tabela de encadeamento\n");
-    }
-}
-
-// ------------------------
-// Remover estudante da tabela linear por numero
-// ------------------------
-// Acrescentado por Denilson
-void removerDaTabelaLinear(int numero) {
-    int indice = encontrarIndiceLinearPorNumero(numero);
-    
-    if(indice != -1) {
-        tabelaLinear[indice].numero = -1;
-        strcpy(tabelaLinear[indice].nome, "");
-        strcpy(tabelaLinear[indice].curso, "");
-        printf("  • Removido da tabela linear (indice %d)\n", indice);
-    } else {
-        printf("  • Estudante nao encontrado na tabela linear\n");
-    }
-}
-
-// ------------------------
-// Encontrar indice na tabela linear pelo numero do estudante
-// ------------------------
-// Acrescentado por Denilson
-int encontrarIndiceLinearPorNumero(int numero) {
-    int indiceOriginal = funcaoHash(numero);
-    int indice = indiceOriginal;
-    
-    do {
-        if(tabelaLinear[indice].numero == numero) {
-            return indice;
+    // Verificar na tabela linear
+    for(int i = 0; i < TAM; i++) {
+        if(tabelaLinear[i].numero == numero) {
+            char tempNomeMinusculo[MAX_NOME];
+            char tempCursoMinusculo[MAX_CURSO];
+            strcpy(tempNomeMinusculo, tabelaLinear[i].nome);
+            strcpy(tempCursoMinusculo, tabelaLinear[i].curso);
+            converterParaMinusculas(tempNomeMinusculo);
+            converterParaMinusculas(tempCursoMinusculo);
+            
+            if(strcmp(tempNomeMinusculo, nomeMinusculo) == 0 && 
+               strcmp(tempCursoMinusculo, cursoMinusculo) == 0) {
+                printf("\n!!! ESTUDANTE DUPLICADO DETECTADO !!!\n");
+                printf("Ja existe um estudante com:\n");
+                printf("  Numero: %d\n", tabelaLinear[i].numero);
+                printf("  Nome: %s\n", tabelaLinear[i].nome);
+                printf("  Curso: %s\n", tabelaLinear[i].curso);
+                printf("Insercao cancelada para evitar duplicacao.\n");
+                return 1;
+            }
         }
-        indice = (indice + 1) % TAM;
-    } while(indice != indiceOriginal);
+    }
     
-    return -1;  // Nao encontrado
+    return 0;
 }
 
 // ------------------------
-// Menu de remocao de estudante (MODIFICADO)
+// Inserir estudante (MODIFICADO com normalizacao)
 // ------------------------
 // Acrescentado por Frederico (Modificado por Denilson)
-void menuRemover() {
-    int opcao;
+void inserirEstudante() {
     int numero;
-    char numStr[MAX_STR];
+    char nome[MAX_NOME];
+    char curso[MAX_CURSO];
     
-    do {
-        exibirSubMenu("REMOVER ESTUDANTE");
-        scanf("%d", &opcao);
-        limparBuffer();
-        
-        switch(opcao) {
-            case 1:
-                printf("\n--- Remocao por Encadeamento ---\n");
-                // Mostrar tabela para escolha
-                exibirTabelaEncadeamento();
-                
-                // Escolher indice e aluno
-                removerEncadeamento();  // Esta funcao agora chama removerDeAmbasTabelas
-                break;
-                
-            case 2:
-                printf("\n--- Remocao por Sondagem Linear ---\n");
-                // Mostrar tabela para escolha
-                exibirTabelaLinear();
-                
-                // Escolher indice e remover
-                removerLinear();  // Esta funcao agora chama removerDeAmbasTabelas
-                break;
-                
-            case 0:
-                printf("Voltando ao menu principal...\n");
-                break;
-                
-            default:
-                printf("Opcao invalida!\n");
-                pausar();
-        }
-    } while(opcao != 0);
+    lerDadosEstudante(&numero, nome, curso);
+    
+    // Converter tudo para minusculas antes de inserir
+    converterParaMinusculas(nome);
+    converterParaMinusculas(curso);
+    
+    printf("\n--- Dados normalizados (minusculas) ---\n");
+    printf("Numero: %d\n", numero);
+    printf("Nome: %s\n", nome);
+    printf("Curso: %s\n", curso);
+    
+    // Verificar se estudante ja existe
+    if(verificarEstudanteDuplicado(numero, nome, curso)) {
+        printf("Operacao cancelada.\n");
+        pausar();
+        return;
+    }
+    
+    printf("\n--- Inserindo nas tabelas ---\n");
+    inserirEncadeamento(numero, nome, curso);
+    inserirLinear(numero, nome, curso);
+    
+    printf("\n--- Estado atual das tabelas ---\n");
+    exibirTodasTabelas();
+    
+    pausar();
 }
 
 // ------------------------
@@ -435,6 +466,124 @@ void removerLinear() {
     } else {
         printf("Operacao cancelada.\n");
     }
+}
+
+// ------------------------
+// Remover estudante de ambas as tabelas
+// ------------------------
+// Acrescentado por Denilson
+void removerDeAmbasTabelas(int numero) {
+    printf("\n--- Removendo de ambas as tabelas ---\n");
+    
+    // Remover da tabela de encadeamento
+    removerDaTabelaEncadeamento(numero);
+    
+    // Remover da tabela linear
+    removerDaTabelaLinear(numero);
+}
+
+// ------------------------
+// Remover estudante da tabela de encadeamento por numero
+// ------------------------
+// Acrescentado por Denilson
+void removerDaTabelaEncadeamento(int numero) {
+    int indice = funcaoHash(numero);
+    Estudante* temp = tabelaEncadeamento[indice];
+    Estudante* ant = NULL;
+    int encontrado = 0;
+    
+    while(temp != NULL) {
+        if(temp->numero == numero) {
+            encontrado = 1;
+            if(ant == NULL) {
+                tabelaEncadeamento[indice] = temp->prox;
+            } else {
+                ant->prox = temp->prox;
+            }
+            free(temp);
+            printf("  • Removido da tabela de encadeamento (indice %d)\n", indice);
+            break;
+        }
+        ant = temp;
+        temp = temp->prox;
+    }
+    
+    if(!encontrado) {
+        printf("  • Estudante nao encontrado na tabela de encadeamento\n");
+    }
+}
+
+// ------------------------
+// Remover estudante da tabela linear por numero
+// ------------------------
+// Acrescentado por Denilson
+void removerDaTabelaLinear(int numero) {
+    int indice = encontrarIndiceLinearPorNumero(numero);
+    
+    if(indice != -1) {
+        tabelaLinear[indice].numero = -1;
+        strcpy(tabelaLinear[indice].nome, "");
+        strcpy(tabelaLinear[indice].curso, "");
+        printf("  • Removido da tabela linear (indice %d)\n", indice);
+    } else {
+        printf("  • Estudante nao encontrado na tabela linear\n");
+    }
+}
+
+// ------------------------
+// Encontrar indice na tabela linear pelo numero do estudante
+// ------------------------
+// Acrescentado por Denilson
+int encontrarIndiceLinearPorNumero(int numero) {
+    int indiceOriginal = funcaoHash(numero);
+    int indice = indiceOriginal;
+    
+    do {
+        if(tabelaLinear[indice].numero == numero) {
+            return indice;
+        }
+        indice = (indice + 1) % TAM;
+    } while(indice != indiceOriginal);
+    
+    return -1;  // Nao encontrado
+}
+
+// ------------------------
+// Menu de remocao de estudante
+// ------------------------
+// Acrescentado por Frederico
+void menuRemover() {
+    int opcao;
+    
+    do {
+        exibirSubMenu("REMOVER ESTUDANTE");
+        scanf("%d", &opcao);
+        limparBuffer();
+        
+        switch(opcao) {
+            case 1:
+                printf("\n--- Remocao por Encadeamento ---\n");
+                exibirTabelaEncadeamento();
+                removerEncadeamento();
+                pausar();
+                break;
+                
+            case 2:
+                printf("\n--- Remocao por Sondagem Linear ---\n");
+                exibirTabelaLinear();
+                removerLinear();
+                pausar();
+                break;
+                
+            case 0:
+                printf("Voltando ao menu principal...\n");
+                break;
+                
+            default:
+                printf("Opcao invalida!\n");
+                pausar();
+        }
+    } while(opcao != 0);
 }
 
 // ------------------------
@@ -662,27 +811,6 @@ void mostrarAlunoIndiceLinear(int indice) {
         printf("Indice original calculado: %d\n", indiceOriginal);
         printf("Indice real apos sondagem: %d)\n", indice);
     }
-}
-
-// ------------------------
-// Inserir estudante (sem escolha de metodo)
-// ------------------------
-// Acrescentado por Frederico (modificado por Ludovina)
-void inserirEstudante() {
-    int numero;
-    char nome[MAX_NOME];
-    char curso[MAX_CURSO];
-    
-    lerDadosEstudante(&numero, nome, curso);
-    
-    printf("\n--- Inserindo nas tabelas ---\n");
-    inserirEncadeamento(numero, nome, curso);
-    inserirLinear(numero, nome, curso);
-    
-    printf("\n--- Estado atual das tabelas ---\n");
-    exibirTodasTabelas();
-    
-    pausar();
 }
 
 // ------------------------
