@@ -1,8 +1,12 @@
 /*
  * SISTEMA DE REGISTO DE ESTUDANTES COM TABELA HASH
  * Elaborado por Denilson - Commit 1
- * Acrescentado por Ludovina - Commit 2 (Validações e Interface)
- * Acrescentado por Frederico - Commit 3 (Inserção no Menu)
+ * Acrescentado por Ludovina - Commit 2 (Validacoes e Interface)
+ * Acrescentado por Frederico - Commit 3 (Insercao no Menu)
+ * Acrescentado por Denilson - Commit 4 (Insercao Encadeamento)
+ * Acrescentado por Ludovina - Commit 5 (Insercao Linear)
+ * Acrescentado por Frederico - Commit 6 (Exibicao das Tabelas)
+ * Acrescentado por Denilson - Commit 7 (Busca Interativa)
  */
 
 #include <stdio.h>
@@ -11,8 +15,8 @@
 #include <ctype.h>
 
 #define TAM 10          // Tamanho das tabelas hash
-#define MAX_NOME 50     // Tamanho máximo para nome
-#define MAX_CURSO 50    // Tamanho máximo para curso
+#define MAX_NOME 50     // Tamanho maximo para nome
+#define MAX_CURSO 50    // Tamanho maximo para curso
 #define MAX_STR 10      // Tamanho para strings de entrada
 
 // ------------------------
@@ -20,10 +24,10 @@
 // ------------------------
 // Elaborado por Denilson
 typedef struct Estudante {
-    int numero;                 // Número do estudante (matrícula)
+    int numero;                 // Numero do estudante (matricula)
     char nome[MAX_NOME];        // Nome completo
     char curso[MAX_CURSO];      // Curso
-    struct Estudante* prox;     // Ponteiro para próximo (encadeamento)
+    struct Estudante* prox;     // Ponteiro para proximo (encadeamento)
 } Estudante;
 
 // ------------------------
@@ -34,7 +38,7 @@ Estudante* tabelaEncadeamento[TAM];     // Tabela para encadeamento (lista ligad
 Estudante tabelaLinear[TAM];             // Tabela para sondagem linear (vetor)
 
 // ------------------------
-// Protótipos das funções
+// Prototipos das funcoes
 // ------------------------
 // Elaborado por Denilson
 void inicializarTabelas();
@@ -44,7 +48,7 @@ void limparBuffer();
 void pausar();
 
 // ------------------------
-// Protótipos adicionados por Ludovina
+// Prototipos adicionados por Ludovina
 // ------------------------
 // Acrescentado por Ludovina
 int validarApenasDigitos(char str[]);
@@ -54,15 +58,47 @@ void lerString(char destino[], int tamanho, char mensagem[]);
 void exibirSubMenu(char titulo[]);
 
 // ------------------------
-// Protótipos adicionados por Frederico
+// Prototipos adicionados por Frederico
 // ------------------------
 // Acrescentado por Frederico
 void inserirEstudante();
 void lerDadosEstudante(int *numero, char nome[], char curso[]);
-void menuInserir();
 
 // ------------------------
-// Função main - Menu principal
+// Prototipos adicionados por Denilson
+// ------------------------
+// Acrescentado por Denilson
+void inserirEncadeamento(int numero, char nome[], char curso[]);
+void exibirMensagemColisaoEncadeamento(int indice);
+
+// ------------------------
+// Prototipos adicionados por Ludovina (Commit 5)
+// ------------------------
+// Acrescentado por Ludovina
+void inserirLinear(int numero, char nome[], char curso[]);
+void exibirMensagemColisaoLinear(int indiceOcupado, int proximoIndice);
+
+// ------------------------
+// Prototipos adicionados por Frederico (Commit 6)
+// ------------------------
+// Acrescentado por Frederico
+void exibirTabelaEncadeamento();
+void exibirTabelaLinear();
+void exibirTodasTabelas();
+void desenharLinha(int tamanho);
+
+// ------------------------
+// Prototipos adicionados por Denilson (Commit 7)
+// ------------------------
+// Acrescentado por Denilson
+void menuProcurar();
+void procurarEncadeamento();
+void procurarLinear();
+void listarAlunosIndiceEncadeamento(int indice);
+void mostrarAlunoIndiceLinear(int indice);
+
+// ------------------------
+// Funcao main - Menu principal
 // ------------------------
 // Elaborado por Denilson
 int main() {
@@ -78,6 +114,10 @@ int main() {
     printf("   Elaborado por Denilson (Commit 1)\n");
     printf("   Acrescentado por Ludovina (Commit 2)\n");
     printf("   Acrescentado por Frederico (Commit 3)\n");
+    printf("   Acrescentado por Denilson (Commit 4)\n");
+    printf("   Acrescentado por Ludovina (Commit 5)\n");
+    printf("   Acrescentado por Frederico (Commit 6)\n");
+    printf("   Acrescentado por Denilson (Commit 7)\n");
     printf("============================================\n\n");
     
     do {
@@ -88,13 +128,12 @@ int main() {
         
         switch(opcao) {
             case 1:
-                menuInserir();
+                printf("\n--- INSERIR ESTUDANTE ---\n");
+                inserirEstudante();
                 break;
                 
             case 2:
-                printf("\n--- PROCURAR ESTUDANTE ---\n");
-                printf("Funcionalidade em desenvolvimento...\n");
-                pausar();
+                menuProcurar();
                 break;
                 
             case 3:
@@ -119,29 +158,27 @@ int main() {
 }
 
 // ------------------------
-// Menu de inserção de estudante
+// Menu de procura de estudante
 // ------------------------
-// Acrescentado por Frederico
-void menuInserir() {
+// Acrescentado por Denilson
+void menuProcurar() {
     int opcao;
     
     do {
-        exibirSubMenu("INSERIR ESTUDANTE");
+        exibirSubMenu("PROCURAR ESTUDANTE");
         scanf("%d", &opcao);
         limparBuffer();
         
         switch(opcao) {
             case 1:
-                printf("\n--- Inserir via Encadeamento ---\n");
-                inserirEstudante();
-                printf("(Lógica de encadeamento será implementada no próximo commit)\n");
+                printf("\n--- Busca por Encadeamento ---\n");
+                procurarEncadeamento();
                 pausar();
                 break;
                 
             case 2:
-                printf("\n--- Inserir via Sondagem Linear ---\n");
-                inserirEstudante();
-                printf("(Lógica de sondagem linear será implementada no próximo commit)\n");
+                printf("\n--- Busca por Sondagem Linear ---\n");
+                procurarLinear();
                 pausar();
                 break;
                 
@@ -157,7 +194,323 @@ void menuInserir() {
 }
 
 // ------------------------
-// Ler dados do estudante com validações
+// Procurar estudante na tabela de encadeamento
+// ------------------------
+// Acrescentado por Denilson
+void procurarEncadeamento() {
+    int indice;
+    char indiceStr[MAX_STR];
+    
+    // Mostrar tabela atual
+    exibirTabelaEncadeamento();
+    
+    // Pedir indice para busca
+    printf("\n--- Busca por Encadeamento ---\n");
+    printf("Digite o indice que deseja consultar (0 a %d): ", TAM-1);
+    
+    do {
+        lerString(indiceStr, MAX_STR, "");
+        if(!validarApenasDigitos(indiceStr)) {
+            printf("Erro: Digite apenas numeros! Tente novamente: ");
+        }
+    } while(!validarApenasDigitos(indiceStr));
+    
+    indice = atoi(indiceStr);
+    
+    if(indice < 0 || indice >= TAM) {
+        printf("Indice invalido! Deve ser entre 0 e %d.\n", TAM-1);
+        return;
+    }
+    
+    // Listar alunos do indice escolhido
+    listarAlunosIndiceEncadeamento(indice);
+}
+
+// ------------------------
+// Listar todos os alunos de um indice na tabela de encadeamento
+// ------------------------
+// Acrescentado por Denilson
+void listarAlunosIndiceEncadeamento(int indice) {
+    printf("\n--- Alunos no indice %d (Encadeamento) ---\n", indice);
+    
+    if(tabelaEncadeamento[indice] == NULL) {
+        printf("Nenhum aluno encontrado neste indice.\n");
+        return;
+    }
+    
+    Estudante* temp = tabelaEncadeamento[indice];
+    int cont = 1;
+    
+    printf("Total de alunos neste indice: (lista locada)\n");
+    desenharLinha(50);
+    
+    while(temp != NULL) {
+        printf("Aluno %d:\n", cont);
+        printf("  Numero: %d\n", temp->numero);
+        printf("  Nome: %s\n", temp->nome);
+        printf("  Curso: %s\n", temp->curso);
+        desenharLinha(30);
+        
+        temp = temp->prox;
+        cont++;
+    }
+}
+
+// ------------------------
+// Procurar estudante na tabela de sondagem linear
+// ------------------------
+// Acrescentado por Denilson
+void procurarLinear() {
+    int indice;
+    char indiceStr[MAX_STR];
+    
+    // Mostrar tabela atual
+    exibirTabelaLinear();
+    
+    // Pedir indice para busca
+    printf("\n--- Busca por Sondagem Linear ---\n");
+    printf("Digite o indice que deseja consultar (0 a %d): ", TAM-1);
+    
+    do {
+        lerString(indiceStr, MAX_STR, "");
+        if(!validarApenasDigitos(indiceStr)) {
+            printf("Erro: Digite apenas numeros! Tente novamente: ");
+        }
+    } while(!validarApenasDigitos(indiceStr));
+    
+    indice = atoi(indiceStr);
+    
+    if(indice < 0 || indice >= TAM) {
+        printf("Indice invalido! Deve ser entre 0 e %d.\n", TAM-1);
+        return;
+    }
+    
+    // Mostrar aluno do indice escolhido
+    mostrarAlunoIndiceLinear(indice);
+}
+
+// ------------------------
+// Mostrar aluno de um indice na tabela linear
+// ------------------------
+// Acrescentado por Denilson
+void mostrarAlunoIndiceLinear(int indice) {
+    printf("\n--- Aluno no indice %d (Sondagem Linear) ---\n", indice);
+    
+    if(tabelaLinear[indice].numero == -1) {
+        printf("Nenhum aluno encontrado neste indice.\n");
+        return;
+    }
+    
+    printf("Numero: %d\n", tabelaLinear[indice].numero);
+    printf("Nome: %s\n", tabelaLinear[indice].nome);
+    printf("Curso: %s\n", tabelaLinear[indice].curso);
+    
+    // Verificar se houve colisao (indice diferente do calculado)
+    int indiceOriginal = funcaoHash(tabelaLinear[indice].numero);
+    if(indiceOriginal != indice) {
+        printf("\n(Observacao: Este aluno sofreu colisao na insercao.\n");
+        printf("Indice original calculado: %d\n", indiceOriginal);
+        printf("Indice real apos sondagem: %d)\n", indice);
+    }
+}
+
+// ------------------------
+// Inserir estudante (sem escolha de metodo)
+// ------------------------
+// Acrescentado por Frederico (modificado por Ludovina)
+void inserirEstudante() {
+    int numero;
+    char nome[MAX_NOME];
+    char curso[MAX_CURSO];
+    
+    // Ler dados do estudante
+    lerDadosEstudante(&numero, nome, curso);
+    
+    // Inserir automaticamente nas duas tabelas
+    printf("\n--- Inserindo nas tabelas ---\n");
+    inserirEncadeamento(numero, nome, curso);
+    inserirLinear(numero, nome, curso);
+    
+    // Mostrar como ficaram as tabelas apos insercao
+    printf("\n--- Estado atual das tabelas ---\n");
+    exibirTodasTabelas();
+    
+    pausar();
+}
+
+// ------------------------
+// Inserir estudante na tabela de encadeamento
+// ------------------------
+// Acrescentado por Denilson
+void inserirEncadeamento(int numero, char nome[], char curso[]) {
+    int indice = funcaoHash(numero);
+    Estudante* novo = (Estudante*)malloc(sizeof(Estudante));
+    
+    // Preencher dados do novo estudante
+    novo->numero = numero;
+    strcpy(novo->nome, nome);
+    strcpy(novo->curso, curso);
+    novo->prox = NULL;
+    
+    printf("\n[ENCADEAMENTO] Numero: %d\n", numero);
+    printf("Indice calculado: %d\n", indice);
+    
+    // Verificar se o indice esta vazio
+    if(tabelaEncadeamento[indice] == NULL) {
+        // Indice vazio - insercao direta
+        tabelaEncadeamento[indice] = novo;
+        printf("Indice %d: vazio - inserido com sucesso!\n", indice);
+    } else {
+        // Indice ocupado - tratar colisao com lista locada
+        exibirMensagemColisaoEncadeamento(indice);
+        
+        Estudante* temp = tabelaEncadeamento[indice];
+        while(temp->prox != NULL) {
+            temp = temp->prox;
+        }
+        temp->prox = novo;
+        
+        printf("Estudante alocado no final da lista do indice %d.\n", indice);
+    }
+}
+
+// ------------------------
+// Exibir mensagem de colisao para encadeamento
+// ------------------------
+// Acrescentado por Denilson
+void exibirMensagemColisaoEncadeamento(int indice) {
+    printf("\n!!! COLISAO DETECTADA !!!\n");
+    printf("Indice %d ja esta ocupado.\n", indice);
+    printf("Como e uma tabela com encadeamento (lista locada),\n");
+    printf("o estudante sera alocado no final da lista existente.\n");
+    printf("----------------------------------------\n");
+}
+
+// ------------------------
+// Inserir estudante na tabela de sondagem linear
+// ------------------------
+// Acrescentado por Ludovina
+void inserirLinear(int numero, char nome[], char curso[]) {
+    int indiceOriginal = funcaoHash(numero);
+    int indice = indiceOriginal;
+    int tentativas = 0;
+    
+    printf("\n[LINEAR] Numero: %d\n", numero);
+    printf("Indice calculado: %d\n", indiceOriginal);
+    
+    // Procurar posicao vazia (sondagem linear)
+    while(tabelaLinear[indice].numero != -1 && tentativas < TAM) {
+        tentativas++;
+        exibirMensagemColisaoLinear(indice, (indice + 1) % TAM);
+        indice = (indice + 1) % TAM;
+        
+        if(indice == indiceOriginal) {
+            printf("\n!!! TABELA CHEIA !!!\n");
+            printf("Nao foi possivel inserir o estudante na tabela linear.\n");
+            return;
+        }
+    }
+    
+    // Inserir na posicao encontrada
+    tabelaLinear[indice].numero = numero;
+    strcpy(tabelaLinear[indice].nome, nome);
+    strcpy(tabelaLinear[indice].curso, curso);
+    tabelaLinear[indice].prox = NULL;
+    
+    if(indice == indiceOriginal) {
+        printf("Indice %d: vazio - inserido com sucesso!\n", indice);
+    } else {
+        printf("Estudante inserido no indice %d (apos sondagem).\n", indice);
+    }
+}
+
+// ------------------------
+// Exibir mensagem de colisao para sondagem linear
+// ------------------------
+// Acrescentado por Ludovina
+void exibirMensagemColisaoLinear(int indiceOcupado, int proximoIndice) {
+    printf("\n!!! COLISAO DETECTADA !!!\n");
+    printf("Indice %d ocupado, apliquei no indice %d (sondagem linear).\n", 
+           indiceOcupado, proximoIndice);
+    printf("----------------------------------------\n");
+}
+
+// ------------------------
+// Exibir tabela de encadeamento
+// ------------------------
+// Acrescentado por Frederico
+void exibirTabelaEncadeamento() {
+    printf("\n=== TABELA HASH - ENCADEAMENTO ===\n");
+    printf("Indice | Status | Alunos\n");
+    desenharLinha(40);
+    
+    for(int i = 0; i < TAM; i++) {
+        printf("%3d    | ", i);
+        
+        if(tabelaEncadeamento[i] == NULL) {
+            printf("Vazio   | (nenhum aluno)\n");
+        } else {
+            printf("Ocupado | ");
+            Estudante* temp = tabelaEncadeamento[i];
+            int cont = 1;
+            
+            while(temp != NULL) {
+                if(cont > 1) printf("         |         ");
+                printf("%d: %s (%s)\n", temp->numero, temp->nome, temp->curso);
+                temp = temp->prox;
+                cont++;
+            }
+        }
+        desenharLinha(40);
+    }
+}
+
+// ------------------------
+// Exibir tabela de sondagem linear
+// ------------------------
+// Acrescentado por Frederico
+void exibirTabelaLinear() {
+    printf("\n=== TABELA HASH - SONDAGEM LINEAR ===\n");
+    printf("Indice | Status   | Aluno\n");
+    desenharLinha(40);
+    
+    for(int i = 0; i < TAM; i++) {
+        printf("%3d    | ", i);
+        
+        if(tabelaLinear[i].numero == -1) {
+            printf("Vazio     | (nenhum aluno)\n");
+        } else {
+            printf("Ocupado   | %d: %s (%s)\n", 
+                   tabelaLinear[i].numero, 
+                   tabelaLinear[i].nome, 
+                   tabelaLinear[i].curso);
+        }
+        desenharLinha(40);
+    }
+}
+
+// ------------------------
+// Exibir todas as tabelas
+// ------------------------
+// Acrescentado por Frederico
+void exibirTodasTabelas() {
+    exibirTabelaEncadeamento();
+    exibirTabelaLinear();
+}
+
+// ------------------------
+// Desenhar linha separadora
+// ------------------------
+// Acrescentado por Frederico
+void desenharLinha(int tamanho) {
+    for(int i = 0; i < tamanho; i++) {
+        printf("-");
+    }
+    printf("\n");
+}
+
+// ------------------------
+// Ler dados do estudante com validacoes
 // ------------------------
 // Acrescentado por Frederico
 void lerDadosEstudante(int *numero, char nome[], char curso[]) {
@@ -166,7 +519,7 @@ void lerDadosEstudante(int *numero, char nome[], char curso[]) {
     
     printf("\n--- Dados do Estudante ---\n");
     
-    // Ler número (apenas dígitos)
+    // Ler numero (apenas digitos)
     do {
         lerString(numStr, MAX_STR, "Numero do estudante (apenas digitos): ");
         valido = 1;
@@ -184,7 +537,7 @@ void lerDadosEstudante(int *numero, char nome[], char curso[]) {
     
     *numero = atoi(numStr);
     
-    // Ler nome (apenas letras e espaços)
+    // Ler nome (apenas letras e espacos)
     do {
         lerString(nome, MAX_NOME, "Nome do estudante (apenas letras): ");
         valido = 1;
@@ -200,7 +553,7 @@ void lerDadosEstudante(int *numero, char nome[], char curso[]) {
         
     } while(!valido);
     
-    // Ler curso (apenas letras e espaços)
+    // Ler curso (apenas letras e espacos)
     do {
         lerString(curso, MAX_CURSO, "Curso do estudante (apenas letras): ");
         valido = 1;
@@ -216,26 +569,7 @@ void lerDadosEstudante(int *numero, char nome[], char curso[]) {
         
     } while(!valido);
     
-    printf("\nDados lidos com sucesso!\n");
-    printf("Numero: %d\n", *numero);
-    printf("Nome: %s\n", nome);
-    printf("Curso: %s\n", curso);
-}
-
-// ------------------------
-// Função placeholder para inserir estudante
-// ------------------------
-// Acrescentado por Frederico
-void inserirEstudante() {
-    int numero;
-    char nome[MAX_NOME];
-    char curso[MAX_CURSO];
-    
-    lerDadosEstudante(&numero, nome, curso);
-    
-    // Por enquanto apenas mostra os dados
-    // A lógica real de inserção virá nos próximos commits
-    printf("\n[Dados prontos para inserir na tabela]\n");
+    printf("\nDados validados com sucesso!\n");
 }
 
 // ------------------------
@@ -260,7 +594,7 @@ void inicializarTabelas() {
 }
 
 // ------------------------
-// Função hash (resto da divisão)
+// Funcao hash (resto da divisao)
 // ------------------------
 // Elaborado por Denilson
 int funcaoHash(int numero) {
@@ -298,46 +632,46 @@ void exibirSubMenu(char titulo[]) {
 }
 
 // ------------------------
-// Validar se string contém apenas dígitos
+// Validar se string contem apenas digitos
 // ------------------------
 // Acrescentado por Ludovina
 int validarApenasDigitos(char str[]) {
     for(int i = 0; str[i] != '\0'; i++) {
         if(!isdigit(str[i])) {
-            return 0;  // Não é dígito
+            return 0;  // Nao e digito
         }
     }
-    return 1;  // São apenas dígitos
+    return 1;  // Sao apenas digitos
 }
 
 // ------------------------
-// Validar se string contém apenas letras e espaços
+// Validar se string contem apenas letras e espacos
 // ------------------------
 // Acrescentado por Ludovina
 int validarApenasLetras(char str[]) {
     for(int i = 0; str[i] != '\0'; i++) {
         if(!isalpha(str[i]) && str[i] != ' ') {
-            return 0;  // Não é letra nem espaço
+            return 0;  // Nao e letra nem espaco
         }
     }
-    return 1;  // São apenas letras e espaços
+    return 1;  // Sao apenas letras e espacos
 }
 
 // ------------------------
-// Validar se campo não está vazio
+// Validar se campo nao esta vazio
 // ------------------------
 // Acrescentado por Ludovina
 int validarCampoVazio(char str[]) {
     for(int i = 0; str[i] != '\0'; i++) {
         if(str[i] != ' ' && str[i] != '\n' && str[i] != '\t') {
-            return 0;  // Tem caracteres não vazios
+            return 0;  // Tem caracteres nao vazios
         }
     }
-    return 1;  // Está vazio
+    return 1;  // Esta vazio
 }
 
 // ------------------------
-// Ler string com validação simples
+// Ler string com validacao simples
 // ------------------------
 // Acrescentado por Ludovina
 void lerString(char destino[], int tamanho, char mensagem[]) {
@@ -356,7 +690,7 @@ void limparBuffer() {
 }
 
 // ------------------------
-// Pausar execução
+// Pausar execucao
 // ------------------------
 // Elaborado por Denilson
 void pausar() {
