@@ -3,7 +3,8 @@
  * Elaborado por Denilson - Commit 1
  * Acrescentado por Ludovina - Commit 2 (Validacoes e Interface)
  * Acrescentado por Frederico - Commit 3 (Insercao no Menu)
- * Acrescentado por Denilson - Commit 4 (Insercao Unica)
+ * Acrescentado por Denilson - Commit 4 (Insercao Encadeamento)
+ * Acrescentado por Ludovina - Commit 5 (Insercao Linear)
  */
 
 #include <stdio.h>
@@ -69,6 +70,13 @@ void inserirEncadeamento(int numero, char nome[], char curso[]);
 void exibirMensagemColisaoEncadeamento(int indice);
 
 // ------------------------
+// Prototipos adicionados por Ludovina (Commit 5)
+// ------------------------
+// Acrescentado por Ludovina
+void inserirLinear(int numero, char nome[], char curso[]);
+void exibirMensagemColisaoLinear(int indiceOriginal, int indiceFinal);
+
+// ------------------------
 // Funcao main - Menu principal
 // ------------------------
 // Elaborado por Denilson
@@ -86,6 +94,7 @@ int main() {
     printf("   Acrescentado por Ludovina (Commit 2)\n");
     printf("   Acrescentado por Frederico (Commit 3)\n");
     printf("   Acrescentado por Denilson (Commit 4)\n");
+    printf("   Acrescentado por Ludovina (Commit 5)\n");
     printf("============================================\n\n");
     
     do {
@@ -130,7 +139,7 @@ int main() {
 // ------------------------
 // Inserir estudante (sem escolha de metodo)
 // ------------------------
-// Acrescentado por Frederico (modificado por Denilson)
+// Acrescentado por Frederico (modificado por Ludovina)
 void inserirEstudante() {
     int numero;
     char nome[MAX_NOME];
@@ -142,7 +151,7 @@ void inserirEstudante() {
     // Inserir automaticamente nas duas tabelas
     printf("\n--- Inserindo nas tabelas ---\n");
     inserirEncadeamento(numero, nome, curso);
-    // inserirLinear sera implementado no proximo commit
+    inserirLinear(numero, nome, curso);
     
     pausar();
 }
@@ -192,6 +201,55 @@ void exibirMensagemColisaoEncadeamento(int indice) {
     printf("Indice %d ja esta ocupado.\n", indice);
     printf("Como e uma tabela com encadeamento (lista locada),\n");
     printf("o estudante sera alocado no final da lista existente.\n");
+    printf("----------------------------------------\n");
+}
+
+// ------------------------
+// Inserir estudante na tabela de sondagem linear
+// ------------------------
+// Acrescentado por Ludovina
+void inserirLinear(int numero, char nome[], char curso[]) {
+    int indiceOriginal = funcaoHash(numero);
+    int indice = indiceOriginal;
+    int tentativas = 0;
+    
+    printf("\n[LINEAR] Numero: %d\n", numero);
+    printf("Indice calculado: %d\n", indiceOriginal);
+    
+    // Procurar posicao vazia (sondagem linear)
+    while(tabelaLinear[indice].numero != -1 && tentativas < TAM) {
+        tentativas++;
+        exibirMensagemColisaoLinear(indice, (indice + 1) % TAM);
+        indice = (indice + 1) % TAM;
+        
+        if(indice == indiceOriginal) {
+            printf("\n!!! TABELA CHEIA !!!\n");
+            printf("Nao foi possivel inserir o estudante na tabela linear.\n");
+            return;
+        }
+    }
+    
+    // Inserir na posicao encontrada
+    tabelaLinear[indice].numero = numero;
+    strcpy(tabelaLinear[indice].nome, nome);
+    strcpy(tabelaLinear[indice].curso, curso);
+    tabelaLinear[indice].prox = NULL;
+    
+    if(indice == indiceOriginal) {
+        printf("Indice %d: vazio - inserido com sucesso!\n", indice);
+    } else {
+        printf("Estudante inserido no indice %d (apos sondagem).\n", indice);
+    }
+}
+
+// ------------------------
+// Exibir mensagem de colisao para sondagem linear
+// ------------------------
+// Acrescentado por Ludovina
+void exibirMensagemColisaoLinear(int indiceOcupado, int proximoIndice) {
+    printf("\n!!! COLISAO DETECTADA !!!\n");
+    printf("Indice %d ocupado, apliquei no indice %d (sondagem linear).\n", 
+           indiceOcupado, proximoIndice);
     printf("----------------------------------------\n");
 }
 
