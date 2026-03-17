@@ -7,6 +7,7 @@
  * Acrescentado por Ludovina - Commit 5 (Insercao Linear)
  * Acrescentado por Frederico - Commit 6 (Exibicao das Tabelas)
  * Acrescentado por Denilson - Commit 7 (Busca Interativa)
+ * Acrescentado por Denilson - Commit 8 (Persistencia em Arquivo)
  */
 
 #include <stdio.h>
@@ -18,6 +19,10 @@
 #define MAX_NOME 50     // Tamanho maximo para nome
 #define MAX_CURSO 50    // Tamanho maximo para curso
 #define MAX_STR 10      // Tamanho para strings de entrada
+
+// Nomes dos arquivos para persistencia
+#define ARQ_ENCADEAMENTO "estudantes_encadeamento.txt"
+#define ARQ_LINEAR "estudantes_linear.txt"
 
 // ------------------------
 // Estrutura do estudante
@@ -98,6 +103,17 @@ void listarAlunosIndiceEncadeamento(int indice);
 void mostrarAlunoIndiceLinear(int indice);
 
 // ------------------------
+// Prototipos adicionados por Denilson (Commit 8)
+// ------------------------
+// Acrescentado por Denilson
+void salvarEncadeamento();
+void salvarLinear();
+void carregarEncadeamento();
+void carregarLinear();
+void salvarTodasTabelas();
+void carregarTodasTabelas();
+
+// ------------------------
 // Funcao main - Menu principal
 // ------------------------
 // Elaborado por Denilson
@@ -106,6 +122,9 @@ int main() {
     
     // Inicializar as tabelas
     inicializarTabelas();
+    
+    // Carregar dados dos arquivos
+    carregarTodasTabelas();
     
     printf("\n============================================\n");
     printf("   SISTEMA DE REGISTO DE ESTUDANTES\n");
@@ -118,6 +137,7 @@ int main() {
     printf("   Acrescentado por Ludovina (Commit 5)\n");
     printf("   Acrescentado por Frederico (Commit 6)\n");
     printf("   Acrescentado por Denilson (Commit 7)\n");
+    printf("   Acrescentado por Denilson (Commit 8)\n");
     printf("============================================\n\n");
     
     do {
@@ -130,6 +150,8 @@ int main() {
             case 1:
                 printf("\n--- INSERIR ESTUDANTE ---\n");
                 inserirEstudante();
+                // Salvar apos cada insercao
+                salvarTodasTabelas();
                 break;
                 
             case 2:
@@ -144,6 +166,8 @@ int main() {
                 
             case 0:
                 printf("\nSaindo do sistema...\n");
+                printf("Salvando dados...\n");
+                salvarTodasTabelas();
                 printf("Obrigado por utilizar!\n");
                 break;
                 
@@ -155,6 +179,163 @@ int main() {
     } while(opcao != 0);
     
     return 0;
+}
+
+// ------------------------
+// Salvar tabela de encadeamento em arquivo
+// ------------------------
+// Acrescentado por Denilson
+void salvarEncadeamento() {
+    FILE *arquivo = fopen(ARQ_ENCADEAMENTO, "w");
+    
+    if(arquivo == NULL) {
+        printf("Erro ao criar arquivo %s\n", ARQ_ENCADEAMENTO);
+        return;
+    }
+    
+    fprintf(arquivo, "# Tabela Hash - Encadeamento\n");
+    fprintf(arquivo, "# Formato: indice:numero:nome:curso\n\n");
+    
+    for(int i = 0; i < TAM; i++) {
+        if(tabelaEncadeamento[i] != NULL) {
+            Estudante* temp = tabelaEncadeamento[i];
+            while(temp != NULL) {
+                fprintf(arquivo, "%d:%d:%s:%s\n", 
+                        i, temp->numero, temp->nome, temp->curso);
+                temp = temp->prox;
+            }
+        }
+    }
+    
+    fclose(arquivo);
+    printf("Dados de encadeamento salvos em %s\n", ARQ_ENCADEAMENTO);
+}
+
+// ------------------------
+// Salvar tabela linear em arquivo
+// ------------------------
+// Acrescentado por Denilson
+void salvarLinear() {
+    FILE *arquivo = fopen(ARQ_LINEAR, "w");
+    
+    if(arquivo == NULL) {
+        printf("Erro ao criar arquivo %s\n", ARQ_LINEAR);
+        return;
+    }
+    
+    fprintf(arquivo, "# Tabela Hash - Sondagem Linear\n");
+    fprintf(arquivo, "# Formato: indice:numero:nome:curso\n\n");
+    
+    for(int i = 0; i < TAM; i++) {
+        if(tabelaLinear[i].numero != -1) {
+            fprintf(arquivo, "%d:%d:%s:%s\n", 
+                    i, tabelaLinear[i].numero, 
+                    tabelaLinear[i].nome, tabelaLinear[i].curso);
+        }
+    }
+    
+    fclose(arquivo);
+    printf("Dados lineares salvos em %s\n", ARQ_LINEAR);
+}
+
+// ------------------------
+// Salvar todas as tabelas
+// ------------------------
+// Acrescentado por Denilson
+void salvarTodasTabelas() {
+    salvarEncadeamento();
+    salvarLinear();
+    printf("Todos os dados foram salvos com sucesso!\n");
+}
+
+// ------------------------
+// Carregar tabela de encadeamento do arquivo
+// ------------------------
+// Acrescentado por Denilson
+void carregarEncadeamento() {
+    FILE *arquivo = fopen(ARQ_ENCADEAMENTO, "r");
+    
+    if(arquivo == NULL) {
+        printf("Arquivo %s nao encontrado. Iniciando com tabela vazia.\n", ARQ_ENCADEAMENTO);
+        return;
+    }
+    
+    char linha[200];
+    int indice, numero;
+    char nome[MAX_NOME], curso[MAX_CURSO];
+    
+    while(fgets(linha, sizeof(linha), arquivo)) {
+        // Ignorar linhas de comentario
+        if(linha[0] == '#') continue;
+        
+        // Formato: indice:numero:nome:curso
+        if(sscanf(linha, "%d:%d:%[^:]:%[^\n]", &indice, &numero, nome, curso) == 4) {
+            // Criar novo estudante
+            Estudante* novo = (Estudante*)malloc(sizeof(Estudante));
+            novo->numero = numero;
+            strcpy(novo->nome, nome);
+            strcpy(novo->curso, curso);
+            novo->prox = NULL;
+            
+            // Inserir na tabela
+            if(tabelaEncadeamento[indice] == NULL) {
+                tabelaEncadeamento[indice] = novo;
+            } else {
+                Estudante* temp = tabelaEncadeamento[indice];
+                while(temp->prox != NULL) {
+                    temp = temp->prox;
+                }
+                temp->prox = novo;
+            }
+        }
+    }
+    
+    fclose(arquivo);
+    printf("Dados de encadeamento carregados de %s\n", ARQ_ENCADEAMENTO);
+}
+
+// ------------------------
+// Carregar tabela linear do arquivo
+// ------------------------
+// Acrescentado por Denilson
+void carregarLinear() {
+    FILE *arquivo = fopen(ARQ_LINEAR, "r");
+    
+    if(arquivo == NULL) {
+        printf("Arquivo %s nao encontrado. Iniciando com tabela vazia.\n", ARQ_LINEAR);
+        return;
+    }
+    
+    char linha[200];
+    int indice, numero;
+    char nome[MAX_NOME], curso[MAX_CURSO];
+    
+    while(fgets(linha, sizeof(linha), arquivo)) {
+        // Ignorar linhas de comentario
+        if(linha[0] == '#') continue;
+        
+        // Formato: indice:numero:nome:curso
+        if(sscanf(linha, "%d:%d:%[^:]:%[^\n]", &indice, &numero, nome, curso) == 4) {
+            tabelaLinear[indice].numero = numero;
+            strcpy(tabelaLinear[indice].nome, nome);
+            strcpy(tabelaLinear[indice].curso, curso);
+            tabelaLinear[indice].prox = NULL;
+        }
+    }
+    
+    fclose(arquivo);
+    printf("Dados lineares carregados de %s\n", ARQ_LINEAR);
+}
+
+// ------------------------
+// Carregar todas as tabelas
+// ------------------------
+// Acrescentado por Denilson
+void carregarTodasTabelas() {
+    printf("\n--- Carregando dados dos arquivos ---\n");
+    carregarEncadeamento();
+    carregarLinear();
+    printf("------------------------------------\n");
 }
 
 // ------------------------
