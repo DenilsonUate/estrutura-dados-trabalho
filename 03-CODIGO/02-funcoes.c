@@ -11,6 +11,7 @@
  * Acrescentado por Frederico - Commit 9 (Remocao Interativa)
  * Acrescentado por Denilson - Commit 10 (Remocao Sincronizada)
  * Acrescentado por Denilson - Commit 11 (Normalizacao de Texto)
+ * Acrescentado por Ludovina - Commit 12 (Validacao de Espacos)
  */
 
 #include <stdio.h>
@@ -56,7 +57,7 @@ void limparBuffer();
 void pausar();
 
 // ------------------------
-// Prototipos adicionados por Ludovina
+// Prototipos adicionados por Ludovina (Commit 2)
 // ------------------------
 // Acrescentado por Ludovina
 int validarApenasDigitos(char str[]);
@@ -66,14 +67,14 @@ void lerString(char destino[], int tamanho, char mensagem[]);
 void exibirSubMenu(char titulo[]);
 
 // ------------------------
-// Prototipos adicionados por Frederico
+// Prototipos adicionados por Frederico (Commit 3)
 // ------------------------
 // Acrescentado por Frederico
 void inserirEstudante();
 void lerDadosEstudante(int *numero, char nome[], char curso[]);
 
 // ------------------------
-// Prototipos adicionados por Denilson
+// Prototipos adicionados por Denilson (Commit 4)
 // ------------------------
 // Acrescentado por Denilson
 void inserirEncadeamento(int numero, char nome[], char curso[]);
@@ -145,6 +146,14 @@ int compararNomesIgnorandoMaiusculas(char str1[], char str2[]);
 int compararCursosIgnorandoMaiusculas(char str1[], char str2[]);
 
 // ------------------------
+// Prototipos adicionados por Ludovina (Commit 12)
+// ------------------------
+// Acrescentado por Ludovina
+int validarEspacos(char str[]);
+int validarNomeCompleto(char str[]);
+int validarCurso(char str[]);
+
+// ------------------------
 // Funcao main - Menu principal
 // ------------------------
 // Elaborado por Denilson
@@ -171,7 +180,8 @@ int main() {
     printf("   Acrescentado por Denilson (Commit 8)\n");
     printf("   Acrescentado por Frederico (Commit 9)\n");
     printf("   Acrescentado por Denilson (Commit 10)\n");
-    printf("   Acrescentado por Denilson (Commit 11 - Normalizacao)\n");
+    printf("   Acrescentado por Denilson (Commit 11)\n");
+    printf("   Acrescentado por Ludovina (Commit 12)\n");
     printf("============================================\n\n");
     
     do {
@@ -214,9 +224,196 @@ int main() {
 }
 
 // ------------------------
+// Validar se string contem apenas digitos
+// ------------------------
+// Acrescentado por Ludovina (Commit 2)
+int validarApenasDigitos(char str[]) {
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(!isdigit(str[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+// ------------------------
+// Validar se string contem apenas letras e espacos
+// ------------------------
+// Acrescentado por Ludovina (Commit 2)
+int validarApenasLetras(char str[]) {
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(!isalpha(str[i]) && str[i] != ' ') {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+// ------------------------
+// Validar se campo nao esta vazio
+// ------------------------
+// Acrescentado por Ludovina (Commit 2)
+int validarCampoVazio(char str[]) {
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(str[i] != ' ' && str[i] != '\n' && str[i] != '\t') {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+// ------------------------
+// Validar se a string tem espacos consecutivos
+// ------------------------
+// Acrescentado por Ludovina (Commit 12)
+int validarEspacos(char str[]) {
+    int espacoAnterior = 0;
+    
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(str[i] == ' ') {
+            if(espacoAnterior) {
+                return 0;  // Dois espacos consecutivos encontrados
+            }
+            espacoAnterior = 1;
+        } else {
+            espacoAnterior = 0;
+        }
+    }
+    return 1;  // Validacao passou
+}
+
+// ------------------------
+// Validar nome completo (permite espacos, mas nao consecutivos)
+// ------------------------
+// Acrescentado por Ludovina (Commit 12)
+int validarNomeCompleto(char str[]) {
+    // Primeiro verifica se tem apenas letras e espacos
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(!isalpha(str[i]) && str[i] != ' ') {
+            printf("Erro: Nome deve conter apenas letras e espacos.\n");
+            return 0;
+        }
+    }
+    
+    // Verifica espacos consecutivos
+    if(!validarEspacos(str)) {
+        printf("Erro: Nome nao pode ter espacos consecutivos.\n");
+        return 0;
+    }
+    
+    return 1;
+}
+
+// ------------------------
+// Validar curso (permite espacos, mas nao consecutivos)
+// ------------------------
+// Acrescentado por Ludovina (Commit 12)
+int validarCurso(char str[]) {
+    // Primeiro verifica se tem apenas letras e espacos
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(!isalpha(str[i]) && str[i] != ' ') {
+            printf("Erro: Curso deve conter apenas letras e espacos.\n");
+            return 0;
+        }
+    }
+    
+    // Verifica espacos consecutivos
+    if(!validarEspacos(str)) {
+        printf("Erro: Curso nao pode ter espacos consecutivos.\n");
+        return 0;
+    }
+    
+    return 1;
+}
+
+// ------------------------
+// Ler dados do estudante com validacoes
+// ------------------------
+// Acrescentado por Frederico (Modificado por Ludovina)
+void lerDadosEstudante(int *numero, char nome[], char curso[]) {
+    char numStr[MAX_STR];
+    int valido;
+    
+    printf("\n--- Dados do Estudante ---\n");
+    
+    // Ler numero (apenas digitos)
+    do {
+        lerString(numStr, MAX_STR, "Numero do estudante (apenas digitos): ");
+        valido = 1;
+        
+        if(validarCampoVazio(numStr)) {
+            printf("Erro: Campo vazio! Digite novamente.\n");
+            valido = 0;
+        }
+        else if(!validarApenasDigitos(numStr)) {
+            printf("Erro: Apenas numeros sao permitidos!\n");
+            valido = 0;
+        }
+        
+    } while(!valido);
+    
+    *numero = atoi(numStr);
+    
+    // Ler nome com validacao de espacos
+    do {
+        lerString(nome, MAX_NOME, "Nome do estudante: ");
+        valido = 1;
+        
+        if(validarCampoVazio(nome)) {
+            printf("Erro: Campo vazio! Digite novamente.\n");
+            valido = 0;
+        }
+        else if(!validarNomeCompleto(nome)) {
+            valido = 0;
+        }
+        
+    } while(!valido);
+    
+    // Ler curso com validacao de espacos
+    do {
+        lerString(curso, MAX_CURSO, "Curso do estudante: ");
+        valido = 1;
+        
+        if(validarCampoVazio(curso)) {
+            printf("Erro: Campo vazio! Digite novamente.\n");
+            valido = 0;
+        }
+        else if(!validarCurso(curso)) {
+            valido = 0;
+        }
+        
+    } while(!valido);
+}
+
+// ------------------------
+// Ler string
+// ------------------------
+// Acrescentado por Ludovina (Commit 2)
+void lerString(char destino[], int tamanho, char mensagem[]) {
+    printf("%s", mensagem);
+    fgets(destino, tamanho, stdin);
+    destino[strcspn(destino, "\n")] = 0;
+}
+
+// ------------------------
+// Exibir submenu
+// ------------------------
+// Acrescentado por Ludovina (Commit 2)
+void exibirSubMenu(char titulo[]) {
+    printf("\n--------------------------------------------\n");
+    printf("%s\n", titulo);
+    printf("--------------------------------------------\n");
+    printf("1 - Encadeamento (Lista Locada)\n");
+    printf("2 - Sondagem Linear\n");
+    printf("0 - Voltar\n");
+    printf("--------------------------------------------\n");
+    printf("Escolha: ");
+}
+
+// ------------------------
 // Converter string para minusculas
 // ------------------------
-// Acrescentado por Denilson
+// Acrescentado por Denilson (Commit 11)
 void converterParaMinusculas(char str[]) {
     for(int i = 0; str[i] != '\0'; i++) {
         str[i] = tolower(str[i]);
@@ -226,7 +423,7 @@ void converterParaMinusculas(char str[]) {
 // ------------------------
 // Comparar duas strings ignorando maiusculas/minusculas
 // ------------------------
-// Acrescentado por Denilson
+// Acrescentado por Denilson (Commit 11)
 int compararNomesIgnorandoMaiusculas(char str1[], char str2[]) {
     char temp1[MAX_NOME], temp2[MAX_NOME];
     
@@ -242,7 +439,7 @@ int compararNomesIgnorandoMaiusculas(char str1[], char str2[]) {
 // ------------------------
 // Comparar dois cursos ignorando maiusculas/minusculas
 // ------------------------
-// Acrescentado por Denilson
+// Acrescentado por Denilson (Commit 11)
 int compararCursosIgnorandoMaiusculas(char str1[], char str2[]) {
     char temp1[MAX_CURSO], temp2[MAX_CURSO];
     
@@ -258,10 +455,9 @@ int compararCursosIgnorandoMaiusculas(char str1[], char str2[]) {
 // ------------------------
 // Verificar se estudante ja existe nas tabelas
 // ------------------------
-// Acrescentado por Denilson
+// Acrescentado por Denilson (Commit 11) - Corrigido
 int verificarEstudanteDuplicado(int numero, char nome[], char curso[]) {
     int indice = funcaoHash(numero);
-    int encontrado = 0;
     
     // Converter para minusculas para comparacao
     char nomeMinusculo[MAX_NOME];
@@ -289,7 +485,6 @@ int verificarEstudanteDuplicado(int numero, char nome[], char curso[]) {
                 printf("  Numero: %d\n", temp->numero);
                 printf("  Nome: %s\n", temp->nome);
                 printf("  Curso: %s\n", temp->curso);
-                printf("Insercao cancelada para evitar duplicacao.\n");
                 return 1;
             }
         }
@@ -313,7 +508,6 @@ int verificarEstudanteDuplicado(int numero, char nome[], char curso[]) {
                 printf("  Numero: %d\n", tabelaLinear[i].numero);
                 printf("  Nome: %s\n", tabelaLinear[i].nome);
                 printf("  Curso: %s\n", tabelaLinear[i].curso);
-                printf("Insercao cancelada para evitar duplicacao.\n");
                 return 1;
             }
         }
@@ -323,9 +517,9 @@ int verificarEstudanteDuplicado(int numero, char nome[], char curso[]) {
 }
 
 // ------------------------
-// Inserir estudante (MODIFICADO com normalizacao)
+// Inserir estudante
 // ------------------------
-// Acrescentado por Frederico (Modificado por Denilson)
+// Acrescentado por Frederico (Modificado por Denilson e Ludovina)
 void inserirEstudante() {
     int numero;
     char nome[MAX_NOME];
@@ -360,7 +554,360 @@ void inserirEstudante() {
 }
 
 // ------------------------
-// Remover estudante da tabela de encadeamento (MODIFICADO)
+// Inserir estudante na tabela de encadeamento
+// ------------------------
+// Acrescentado por Denilson (Commit 4)
+void inserirEncadeamento(int numero, char nome[], char curso[]) {
+    int indice = funcaoHash(numero);
+    Estudante* novo = (Estudante*)malloc(sizeof(Estudante));
+    
+    novo->numero = numero;
+    strcpy(novo->nome, nome);
+    strcpy(novo->curso, curso);
+    novo->prox = NULL;
+    
+    printf("\n[ENCADEAMENTO] Numero: %d\n", numero);
+    printf("Indice calculado: %d\n", indice);
+    
+    if(tabelaEncadeamento[indice] == NULL) {
+        tabelaEncadeamento[indice] = novo;
+        printf("Indice %d: vazio - inserido com sucesso!\n", indice);
+    } else {
+        exibirMensagemColisaoEncadeamento(indice);
+        
+        Estudante* temp = tabelaEncadeamento[indice];
+        while(temp->prox != NULL) {
+            temp = temp->prox;
+        }
+        temp->prox = novo;
+        
+        printf("Estudante alocado no final da lista do indice %d.\n", indice);
+    }
+}
+
+// ------------------------
+// Exibir mensagem de colisao para encadeamento
+// ------------------------
+// Acrescentado por Denilson (Commit 4)
+void exibirMensagemColisaoEncadeamento(int indice) {
+    printf("\n!!! COLISAO DETECTADA !!!\n");
+    printf("Indice %d ja esta ocupado.\n", indice);
+    printf("Como e uma tabela com encadeamento (lista locada),\n");
+    printf("o estudante sera alocado no final da lista existente.\n");
+    printf("----------------------------------------\n");
+}
+
+// ------------------------
+// Inserir estudante na tabela de sondagem linear
+// ------------------------
+// Acrescentado por Ludovina (Commit 5)
+void inserirLinear(int numero, char nome[], char curso[]) {
+    int indiceOriginal = funcaoHash(numero);
+    int indice = indiceOriginal;
+    int tentativas = 0;
+    
+    printf("\n[LINEAR] Numero: %d\n", numero);
+    printf("Indice calculado: %d\n", indiceOriginal);
+    
+    while(tabelaLinear[indice].numero != -1 && tentativas < TAM) {
+        tentativas++;
+        exibirMensagemColisaoLinear(indice, (indice + 1) % TAM);
+        indice = (indice + 1) % TAM;
+        
+        if(indice == indiceOriginal) {
+            printf("\n!!! TABELA CHEIA !!!\n");
+            printf("Nao foi possivel inserir o estudante na tabela linear.\n");
+            return;
+        }
+    }
+    
+    tabelaLinear[indice].numero = numero;
+    strcpy(tabelaLinear[indice].nome, nome);
+    strcpy(tabelaLinear[indice].curso, curso);
+    tabelaLinear[indice].prox = NULL;
+    
+    if(indice == indiceOriginal) {
+        printf("Indice %d: vazio - inserido com sucesso!\n", indice);
+    } else {
+        printf("Estudante inserido no indice %d (apos sondagem).\n", indice);
+    }
+}
+
+// ------------------------
+// Exibir mensagem de colisao para sondagem linear
+// ------------------------
+// Acrescentado por Ludovina (Commit 5)
+void exibirMensagemColisaoLinear(int indiceOcupado, int proximoIndice) {
+    printf("\n!!! COLISAO DETECTADA !!!\n");
+    printf("Indice %d ocupado, apliquei no indice %d (sondagem linear).\n", 
+           indiceOcupado, proximoIndice);
+    printf("----------------------------------------\n");
+}
+
+// ------------------------
+// Exibir tabela de encadeamento
+// ------------------------
+// Acrescentado por Frederico (Commit 6)
+void exibirTabelaEncadeamento() {
+    printf("\n=== TABELA HASH - ENCADEAMENTO ===\n");
+    printf("Indice | Status | Alunos\n");
+    desenharLinha(40);
+    
+    for(int i = 0; i < TAM; i++) {
+        printf("%3d    | ", i);
+        
+        if(tabelaEncadeamento[i] == NULL) {
+            printf("Vazio   | (nenhum aluno)\n");
+        } else {
+            printf("Ocupado | ");
+            Estudante* temp = tabelaEncadeamento[i];
+            int cont = 1;
+            
+            while(temp != NULL) {
+                if(cont > 1) printf("         |         ");
+                printf("%d: %s (%s)\n", temp->numero, temp->nome, temp->curso);
+                temp = temp->prox;
+                cont++;
+            }
+        }
+        desenharLinha(40);
+    }
+}
+
+// ------------------------
+// Exibir tabela de sondagem linear
+// ------------------------
+// Acrescentado por Frederico (Commit 6)
+void exibirTabelaLinear() {
+    printf("\n=== TABELA HASH - SONDAGEM LINEAR ===\n");
+    printf("Indice | Status   | Aluno\n");
+    desenharLinha(40);
+    
+    for(int i = 0; i < TAM; i++) {
+        printf("%3d    | ", i);
+        
+        if(tabelaLinear[i].numero == -1) {
+            printf("Vazio     | (nenhum aluno)\n");
+        } else {
+            printf("Ocupado   | %d: %s (%s)\n", 
+                   tabelaLinear[i].numero, 
+                   tabelaLinear[i].nome, 
+                   tabelaLinear[i].curso);
+        }
+        desenharLinha(40);
+    }
+}
+
+// ------------------------
+// Exibir todas as tabelas
+// ------------------------
+// Acrescentado por Frederico (Commit 6)
+void exibirTodasTabelas() {
+    exibirTabelaEncadeamento();
+    exibirTabelaLinear();
+}
+
+// ------------------------
+// Desenhar linha separadora
+// ------------------------
+// Acrescentado por Frederico (Commit 6)
+void desenharLinha(int tamanho) {
+    for(int i = 0; i < tamanho; i++) {
+        printf("-");
+    }
+    printf("\n");
+}
+
+// ------------------------
+// Menu de procura de estudante
+// ------------------------
+// Acrescentado por Denilson (Commit 7)
+void menuProcurar() {
+    int opcao;
+    
+    do {
+        exibirSubMenu("PROCURAR ESTUDANTE");
+        scanf("%d", &opcao);
+        limparBuffer();
+        
+        switch(opcao) {
+            case 1:
+                printf("\n--- Busca por Encadeamento ---\n");
+                procurarEncadeamento();
+                pausar();
+                break;
+                
+            case 2:
+                printf("\n--- Busca por Sondagem Linear ---\n");
+                procurarLinear();
+                pausar();
+                break;
+                
+            case 0:
+                printf("Voltando ao menu principal...\n");
+                break;
+                
+            default:
+                printf("Opcao invalida!\n");
+                pausar();
+        }
+    } while(opcao != 0);
+}
+
+// ------------------------
+// Procurar estudante na tabela de encadeamento
+// ------------------------
+// Acrescentado por Denilson (Commit 7)
+void procurarEncadeamento() {
+    int indice;
+    char indiceStr[MAX_STR];
+    
+    exibirTabelaEncadeamento();
+    
+    printf("\n--- Busca por Encadeamento ---\n");
+    printf("Digite o indice que deseja consultar (0 a %d): ", TAM-1);
+    
+    do {
+        lerString(indiceStr, MAX_STR, "");
+        if(!validarApenasDigitos(indiceStr)) {
+            printf("Erro: Digite apenas numeros! Tente novamente: ");
+        }
+    } while(!validarApenasDigitos(indiceStr));
+    
+    indice = atoi(indiceStr);
+    
+    if(indice < 0 || indice >= TAM) {
+        printf("Indice invalido! Deve ser entre 0 e %d.\n", TAM-1);
+        return;
+    }
+    
+    listarAlunosIndiceEncadeamento(indice);
+}
+
+// ------------------------
+// Listar todos os alunos de um indice na tabela de encadeamento
+// ------------------------
+// Acrescentado por Denilson (Commit 7)
+void listarAlunosIndiceEncadeamento(int indice) {
+    printf("\n--- Alunos no indice %d (Encadeamento) ---\n", indice);
+    
+    if(tabelaEncadeamento[indice] == NULL) {
+        printf("Nenhum aluno encontrado neste indice.\n");
+        return;
+    }
+    
+    Estudante* temp = tabelaEncadeamento[indice];
+    int cont = 1;
+    
+    printf("Total de alunos neste indice: (lista locada)\n");
+    desenharLinha(50);
+    
+    while(temp != NULL) {
+        printf("Aluno %d:\n", cont);
+        printf("  Numero: %d\n", temp->numero);
+        printf("  Nome: %s\n", temp->nome);
+        printf("  Curso: %s\n", temp->curso);
+        desenharLinha(30);
+        
+        temp = temp->prox;
+        cont++;
+    }
+}
+
+// ------------------------
+// Procurar estudante na tabela de sondagem linear
+// ------------------------
+// Acrescentado por Denilson (Commit 7)
+void procurarLinear() {
+    int indice;
+    char indiceStr[MAX_STR];
+    
+    exibirTabelaLinear();
+    
+    printf("\n--- Busca por Sondagem Linear ---\n");
+    printf("Digite o indice que deseja consultar (0 a %d): ", TAM-1);
+    
+    do {
+        lerString(indiceStr, MAX_STR, "");
+        if(!validarApenasDigitos(indiceStr)) {
+            printf("Erro: Digite apenas numeros! Tente novamente: ");
+        }
+    } while(!validarApenasDigitos(indiceStr));
+    
+    indice = atoi(indiceStr);
+    
+    if(indice < 0 || indice >= TAM) {
+        printf("Indice invalido! Deve ser entre 0 e %d.\n", TAM-1);
+        return;
+    }
+    
+    mostrarAlunoIndiceLinear(indice);
+}
+
+// ------------------------
+// Mostrar aluno de um indice na tabela linear
+// ------------------------
+// Acrescentado por Denilson (Commit 7)
+void mostrarAlunoIndiceLinear(int indice) {
+    printf("\n--- Aluno no indice %d (Sondagem Linear) ---\n", indice);
+    
+    if(tabelaLinear[indice].numero == -1) {
+        printf("Nenhum aluno encontrado neste indice.\n");
+        return;
+    }
+    
+    printf("Numero: %d\n", tabelaLinear[indice].numero);
+    printf("Nome: %s\n", tabelaLinear[indice].nome);
+    printf("Curso: %s\n", tabelaLinear[indice].curso);
+    
+    int indiceOriginal = funcaoHash(tabelaLinear[indice].numero);
+    if(indiceOriginal != indice) {
+        printf("\n(Observacao: Este aluno sofreu colisao na insercao.\n");
+        printf("Indice original calculado: %d\n", indiceOriginal);
+        printf("Indice real apos sondagem: %d)\n", indice);
+    }
+}
+
+// ------------------------
+// Menu de remocao de estudante
+// ------------------------
+// Acrescentado por Frederico (Commit 9)
+void menuRemover() {
+    int opcao;
+    
+    do {
+        exibirSubMenu("REMOVER ESTUDANTE");
+        scanf("%d", &opcao);
+        limparBuffer();
+        
+        switch(opcao) {
+            case 1:
+                printf("\n--- Remocao por Encadeamento ---\n");
+                exibirTabelaEncadeamento();
+                removerEncadeamento();
+                pausar();
+                break;
+                
+            case 2:
+                printf("\n--- Remocao por Sondagem Linear ---\n");
+                exibirTabelaLinear();
+                removerLinear();
+                pausar();
+                break;
+                
+            case 0:
+                printf("Voltando ao menu principal...\n");
+                break;
+                
+            default:
+                printf("Opcao invalida!\n");
+                pausar();
+        }
+    } while(opcao != 0);
+}
+
+// ------------------------
+// Remover estudante da tabela de encadeamento
 // ------------------------
 // Acrescentado por Frederico (Modificado por Denilson)
 void removerEncadeamento() {
@@ -411,7 +958,7 @@ void removerEncadeamento() {
 }
 
 // ------------------------
-// Remover estudante da tabela de sondagem linear (MODIFICADO)
+// Remover estudante da tabela de sondagem linear
 // ------------------------
 // Acrescentado por Frederico (Modificado por Denilson)
 void removerLinear() {
@@ -469,127 +1016,9 @@ void removerLinear() {
 }
 
 // ------------------------
-// Remover estudante de ambas as tabelas
-// ------------------------
-// Acrescentado por Denilson
-void removerDeAmbasTabelas(int numero) {
-    printf("\n--- Removendo de ambas as tabelas ---\n");
-    
-    // Remover da tabela de encadeamento
-    removerDaTabelaEncadeamento(numero);
-    
-    // Remover da tabela linear
-    removerDaTabelaLinear(numero);
-}
-
-// ------------------------
-// Remover estudante da tabela de encadeamento por numero
-// ------------------------
-// Acrescentado por Denilson
-void removerDaTabelaEncadeamento(int numero) {
-    int indice = funcaoHash(numero);
-    Estudante* temp = tabelaEncadeamento[indice];
-    Estudante* ant = NULL;
-    int encontrado = 0;
-    
-    while(temp != NULL) {
-        if(temp->numero == numero) {
-            encontrado = 1;
-            if(ant == NULL) {
-                tabelaEncadeamento[indice] = temp->prox;
-            } else {
-                ant->prox = temp->prox;
-            }
-            free(temp);
-            printf("  • Removido da tabela de encadeamento (indice %d)\n", indice);
-            break;
-        }
-        ant = temp;
-        temp = temp->prox;
-    }
-    
-    if(!encontrado) {
-        printf("  • Estudante nao encontrado na tabela de encadeamento\n");
-    }
-}
-
-// ------------------------
-// Remover estudante da tabela linear por numero
-// ------------------------
-// Acrescentado por Denilson
-void removerDaTabelaLinear(int numero) {
-    int indice = encontrarIndiceLinearPorNumero(numero);
-    
-    if(indice != -1) {
-        tabelaLinear[indice].numero = -1;
-        strcpy(tabelaLinear[indice].nome, "");
-        strcpy(tabelaLinear[indice].curso, "");
-        printf("  • Removido da tabela linear (indice %d)\n", indice);
-    } else {
-        printf("  • Estudante nao encontrado na tabela linear\n");
-    }
-}
-
-// ------------------------
-// Encontrar indice na tabela linear pelo numero do estudante
-// ------------------------
-// Acrescentado por Denilson
-int encontrarIndiceLinearPorNumero(int numero) {
-    int indiceOriginal = funcaoHash(numero);
-    int indice = indiceOriginal;
-    
-    do {
-        if(tabelaLinear[indice].numero == numero) {
-            return indice;
-        }
-        indice = (indice + 1) % TAM;
-    } while(indice != indiceOriginal);
-    
-    return -1;  // Nao encontrado
-}
-
-// ------------------------
-// Menu de remocao de estudante
-// ------------------------
-// Acrescentado por Frederico
-void menuRemover() {
-    int opcao;
-    
-    do {
-        exibirSubMenu("REMOVER ESTUDANTE");
-        scanf("%d", &opcao);
-        limparBuffer();
-        
-        switch(opcao) {
-            case 1:
-                printf("\n--- Remocao por Encadeamento ---\n");
-                exibirTabelaEncadeamento();
-                removerEncadeamento();
-                pausar();
-                break;
-                
-            case 2:
-                printf("\n--- Remocao por Sondagem Linear ---\n");
-                exibirTabelaLinear();
-                removerLinear();
-                pausar();
-                break;
-                
-            case 0:
-                printf("Voltando ao menu principal...\n");
-                break;
-                
-            default:
-                printf("Opcao invalida!\n");
-                pausar();
-        }
-    } while(opcao != 0);
-}
-
-// ------------------------
 // Escolher qual aluno remover de um indice no encadeamento
 // ------------------------
-// Acrescentado por Frederico
+// Acrescentado por Frederico (Commit 9)
 int escolherAlunoIndiceEncadeamento(int indice) {
     Estudante* temp = tabelaEncadeamento[indice];
     int total = 0;
@@ -641,7 +1070,7 @@ int escolherAlunoIndiceEncadeamento(int indice) {
 // ------------------------
 // Remover aluno de uma posicao especifica no encadeamento
 // ------------------------
-// Acrescentado por Frederico
+// Acrescentado por Frederico (Commit 9)
 void removerAlunoEncadeamento(int indice, int posicao) {
     Estudante* temp = tabelaEncadeamento[indice];
     Estudante* ant = NULL;
@@ -664,324 +1093,89 @@ void removerAlunoEncadeamento(int indice, int posicao) {
 }
 
 // ------------------------
-// Menu de procura de estudante
+// Remover estudante de ambas as tabelas
 // ------------------------
-// Acrescentado por Denilson
-void menuProcurar() {
-    int opcao;
+// Acrescentado por Denilson (Commit 10)
+void removerDeAmbasTabelas(int numero) {
+    printf("\n--- Removendo de ambas as tabelas ---\n");
     
-    do {
-        exibirSubMenu("PROCURAR ESTUDANTE");
-        scanf("%d", &opcao);
-        limparBuffer();
-        
-        switch(opcao) {
-            case 1:
-                printf("\n--- Busca por Encadeamento ---\n");
-                procurarEncadeamento();
-                pausar();
-                break;
-                
-            case 2:
-                printf("\n--- Busca por Sondagem Linear ---\n");
-                procurarLinear();
-                pausar();
-                break;
-                
-            case 0:
-                printf("Voltando ao menu principal...\n");
-                break;
-                
-            default:
-                printf("Opcao invalida!\n");
-                pausar();
-        }
-    } while(opcao != 0);
+    // Remover da tabela de encadeamento
+    removerDaTabelaEncadeamento(numero);
+    
+    // Remover da tabela linear
+    removerDaTabelaLinear(numero);
 }
 
 // ------------------------
-// Procurar estudante na tabela de encadeamento
+// Remover estudante da tabela de encadeamento por numero
 // ------------------------
-// Acrescentado por Denilson
-void procurarEncadeamento() {
-    int indice;
-    char indiceStr[MAX_STR];
-    
-    exibirTabelaEncadeamento();
-    
-    printf("\n--- Busca por Encadeamento ---\n");
-    printf("Digite o indice que deseja consultar (0 a %d): ", TAM-1);
-    
-    do {
-        lerString(indiceStr, MAX_STR, "");
-        if(!validarApenasDigitos(indiceStr)) {
-            printf("Erro: Digite apenas numeros! Tente novamente: ");
-        }
-    } while(!validarApenasDigitos(indiceStr));
-    
-    indice = atoi(indiceStr);
-    
-    if(indice < 0 || indice >= TAM) {
-        printf("Indice invalido! Deve ser entre 0 e %d.\n", TAM-1);
-        return;
-    }
-    
-    listarAlunosIndiceEncadeamento(indice);
-}
-
-// ------------------------
-// Listar todos os alunos de um indice na tabela de encadeamento
-// ------------------------
-// Acrescentado por Denilson
-void listarAlunosIndiceEncadeamento(int indice) {
-    printf("\n--- Alunos no indice %d (Encadeamento) ---\n", indice);
-    
-    if(tabelaEncadeamento[indice] == NULL) {
-        printf("Nenhum aluno encontrado neste indice.\n");
-        return;
-    }
-    
+// Acrescentado por Denilson (Commit 10)
+void removerDaTabelaEncadeamento(int numero) {
+    int indice = funcaoHash(numero);
     Estudante* temp = tabelaEncadeamento[indice];
-    int cont = 1;
-    
-    printf("Total de alunos neste indice: (lista locada)\n");
-    desenharLinha(50);
+    Estudante* ant = NULL;
+    int encontrado = 0;
     
     while(temp != NULL) {
-        printf("Aluno %d:\n", cont);
-        printf("  Numero: %d\n", temp->numero);
-        printf("  Nome: %s\n", temp->nome);
-        printf("  Curso: %s\n", temp->curso);
-        desenharLinha(30);
-        
+        if(temp->numero == numero) {
+            encontrado = 1;
+            if(ant == NULL) {
+                tabelaEncadeamento[indice] = temp->prox;
+            } else {
+                ant->prox = temp->prox;
+            }
+            free(temp);
+            printf("  • Removido da tabela de encadeamento (indice %d)\n", indice);
+            break;
+        }
+        ant = temp;
         temp = temp->prox;
-        cont++;
+    }
+    
+    if(!encontrado) {
+        printf("  • Estudante nao encontrado na tabela de encadeamento\n");
     }
 }
 
 // ------------------------
-// Procurar estudante na tabela de sondagem linear
+// Remover estudante da tabela linear por numero
 // ------------------------
-// Acrescentado por Denilson
-void procurarLinear() {
-    int indice;
-    char indiceStr[MAX_STR];
+// Acrescentado por Denilson (Commit 10)
+void removerDaTabelaLinear(int numero) {
+    int indice = encontrarIndiceLinearPorNumero(numero);
     
-    exibirTabelaLinear();
-    
-    printf("\n--- Busca por Sondagem Linear ---\n");
-    printf("Digite o indice que deseja consultar (0 a %d): ", TAM-1);
-    
-    do {
-        lerString(indiceStr, MAX_STR, "");
-        if(!validarApenasDigitos(indiceStr)) {
-            printf("Erro: Digite apenas numeros! Tente novamente: ");
-        }
-    } while(!validarApenasDigitos(indiceStr));
-    
-    indice = atoi(indiceStr);
-    
-    if(indice < 0 || indice >= TAM) {
-        printf("Indice invalido! Deve ser entre 0 e %d.\n", TAM-1);
-        return;
-    }
-    
-    mostrarAlunoIndiceLinear(indice);
-}
-
-// ------------------------
-// Mostrar aluno de um indice na tabela linear
-// ------------------------
-// Acrescentado por Denilson
-void mostrarAlunoIndiceLinear(int indice) {
-    printf("\n--- Aluno no indice %d (Sondagem Linear) ---\n", indice);
-    
-    if(tabelaLinear[indice].numero == -1) {
-        printf("Nenhum aluno encontrado neste indice.\n");
-        return;
-    }
-    
-    printf("Numero: %d\n", tabelaLinear[indice].numero);
-    printf("Nome: %s\n", tabelaLinear[indice].nome);
-    printf("Curso: %s\n", tabelaLinear[indice].curso);
-    
-    int indiceOriginal = funcaoHash(tabelaLinear[indice].numero);
-    if(indiceOriginal != indice) {
-        printf("\n(Observacao: Este aluno sofreu colisao na insercao.\n");
-        printf("Indice original calculado: %d\n", indiceOriginal);
-        printf("Indice real apos sondagem: %d)\n", indice);
-    }
-}
-
-// ------------------------
-// Inserir estudante na tabela de encadeamento
-// ------------------------
-// Acrescentado por Denilson
-void inserirEncadeamento(int numero, char nome[], char curso[]) {
-    int indice = funcaoHash(numero);
-    Estudante* novo = (Estudante*)malloc(sizeof(Estudante));
-    
-    novo->numero = numero;
-    strcpy(novo->nome, nome);
-    strcpy(novo->curso, curso);
-    novo->prox = NULL;
-    
-    printf("\n[ENCADEAMENTO] Numero: %d\n", numero);
-    printf("Indice calculado: %d\n", indice);
-    
-    if(tabelaEncadeamento[indice] == NULL) {
-        tabelaEncadeamento[indice] = novo;
-        printf("Indice %d: vazio - inserido com sucesso!\n", indice);
+    if(indice != -1) {
+        tabelaLinear[indice].numero = -1;
+        strcpy(tabelaLinear[indice].nome, "");
+        strcpy(tabelaLinear[indice].curso, "");
+        printf("  • Removido da tabela linear (indice %d)\n", indice);
     } else {
-        exibirMensagemColisaoEncadeamento(indice);
-        
-        Estudante* temp = tabelaEncadeamento[indice];
-        while(temp->prox != NULL) {
-            temp = temp->prox;
-        }
-        temp->prox = novo;
-        
-        printf("Estudante alocado no final da lista do indice %d.\n", indice);
+        printf("  • Estudante nao encontrado na tabela linear\n");
     }
 }
 
 // ------------------------
-// Exibir mensagem de colisao para encadeamento
+// Encontrar indice na tabela linear pelo numero do estudante
 // ------------------------
-// Acrescentado por Denilson
-void exibirMensagemColisaoEncadeamento(int indice) {
-    printf("\n!!! COLISAO DETECTADA !!!\n");
-    printf("Indice %d ja esta ocupado.\n", indice);
-    printf("Como e uma tabela com encadeamento (lista locada),\n");
-    printf("o estudante sera alocado no final da lista existente.\n");
-    printf("----------------------------------------\n");
-}
-
-// ------------------------
-// Inserir estudante na tabela de sondagem linear
-// ------------------------
-// Acrescentado por Ludovina
-void inserirLinear(int numero, char nome[], char curso[]) {
+// Acrescentado por Denilson (Commit 10)
+int encontrarIndiceLinearPorNumero(int numero) {
     int indiceOriginal = funcaoHash(numero);
     int indice = indiceOriginal;
-    int tentativas = 0;
     
-    printf("\n[LINEAR] Numero: %d\n", numero);
-    printf("Indice calculado: %d\n", indiceOriginal);
-    
-    while(tabelaLinear[indice].numero != -1 && tentativas < TAM) {
-        tentativas++;
-        exibirMensagemColisaoLinear(indice, (indice + 1) % TAM);
+    do {
+        if(tabelaLinear[indice].numero == numero) {
+            return indice;
+        }
         indice = (indice + 1) % TAM;
-        
-        if(indice == indiceOriginal) {
-            printf("\n!!! TABELA CHEIA !!!\n");
-            printf("Nao foi possivel inserir o estudante na tabela linear.\n");
-            return;
-        }
-    }
+    } while(indice != indiceOriginal);
     
-    tabelaLinear[indice].numero = numero;
-    strcpy(tabelaLinear[indice].nome, nome);
-    strcpy(tabelaLinear[indice].curso, curso);
-    tabelaLinear[indice].prox = NULL;
-    
-    if(indice == indiceOriginal) {
-        printf("Indice %d: vazio - inserido com sucesso!\n", indice);
-    } else {
-        printf("Estudante inserido no indice %d (apos sondagem).\n", indice);
-    }
-}
-
-// ------------------------
-// Exibir mensagem de colisao para sondagem linear
-// ------------------------
-// Acrescentado por Ludovina
-void exibirMensagemColisaoLinear(int indiceOcupado, int proximoIndice) {
-    printf("\n!!! COLISAO DETECTADA !!!\n");
-    printf("Indice %d ocupado, apliquei no indice %d (sondagem linear).\n", 
-           indiceOcupado, proximoIndice);
-    printf("----------------------------------------\n");
-}
-
-// ------------------------
-// Exibir tabela de encadeamento
-// ------------------------
-// Acrescentado por Frederico
-void exibirTabelaEncadeamento() {
-    printf("\n=== TABELA HASH - ENCADEAMENTO ===\n");
-    printf("Indice | Status | Alunos\n");
-    desenharLinha(40);
-    
-    for(int i = 0; i < TAM; i++) {
-        printf("%3d    | ", i);
-        
-        if(tabelaEncadeamento[i] == NULL) {
-            printf("Vazio   | (nenhum aluno)\n");
-        } else {
-            printf("Ocupado | ");
-            Estudante* temp = tabelaEncadeamento[i];
-            int cont = 1;
-            
-            while(temp != NULL) {
-                if(cont > 1) printf("         |         ");
-                printf("%d: %s (%s)\n", temp->numero, temp->nome, temp->curso);
-                temp = temp->prox;
-                cont++;
-            }
-        }
-        desenharLinha(40);
-    }
-}
-
-// ------------------------
-// Exibir tabela de sondagem linear
-// ------------------------
-// Acrescentado por Frederico
-void exibirTabelaLinear() {
-    printf("\n=== TABELA HASH - SONDAGEM LINEAR ===\n");
-    printf("Indice | Status   | Aluno\n");
-    desenharLinha(40);
-    
-    for(int i = 0; i < TAM; i++) {
-        printf("%3d    | ", i);
-        
-        if(tabelaLinear[i].numero == -1) {
-            printf("Vazio     | (nenhum aluno)\n");
-        } else {
-            printf("Ocupado   | %d: %s (%s)\n", 
-                   tabelaLinear[i].numero, 
-                   tabelaLinear[i].nome, 
-                   tabelaLinear[i].curso);
-        }
-        desenharLinha(40);
-    }
-}
-
-// ------------------------
-// Exibir todas as tabelas
-// ------------------------
-// Acrescentado por Frederico
-void exibirTodasTabelas() {
-    exibirTabelaEncadeamento();
-    exibirTabelaLinear();
-}
-
-// ------------------------
-// Desenhar linha separadora
-// ------------------------
-// Acrescentado por Frederico
-void desenharLinha(int tamanho) {
-    for(int i = 0; i < tamanho; i++) {
-        printf("-");
-    }
-    printf("\n");
+    return -1;  // Nao encontrado
 }
 
 // ------------------------
 // Salvar tabela de encadeamento em arquivo
 // ------------------------
-// Acrescentado por Denilson
+// Acrescentado por Denilson (Commit 8)
 void salvarEncadeamento() {
     FILE *arquivo = fopen(ARQ_ENCADEAMENTO, "w");
     
@@ -1010,7 +1204,7 @@ void salvarEncadeamento() {
 // ------------------------
 // Salvar tabela linear em arquivo
 // ------------------------
-// Acrescentado por Denilson
+// Acrescentado por Denilson (Commit 8)
 void salvarLinear() {
     FILE *arquivo = fopen(ARQ_LINEAR, "w");
     
@@ -1036,7 +1230,7 @@ void salvarLinear() {
 // ------------------------
 // Salvar todas as tabelas
 // ------------------------
-// Acrescentado por Denilson
+// Acrescentado por Denilson (Commit 8)
 void salvarTodasTabelas() {
     salvarEncadeamento();
     salvarLinear();
@@ -1045,7 +1239,7 @@ void salvarTodasTabelas() {
 // ------------------------
 // Carregar tabela de encadeamento do arquivo
 // ------------------------
-// Acrescentado por Denilson
+// Acrescentado por Denilson (Commit 8)
 void carregarEncadeamento() {
     FILE *arquivo = fopen(ARQ_ENCADEAMENTO, "r");
     
@@ -1085,7 +1279,7 @@ void carregarEncadeamento() {
 // ------------------------
 // Carregar tabela linear do arquivo
 // ------------------------
-// Acrescentado por Denilson
+// Acrescentado por Denilson (Commit 8)
 void carregarLinear() {
     FILE *arquivo = fopen(ARQ_LINEAR, "r");
     
@@ -1114,74 +1308,16 @@ void carregarLinear() {
 // ------------------------
 // Carregar todas as tabelas
 // ------------------------
-// Acrescentado por Denilson
+// Acrescentado por Denilson (Commit 8)
 void carregarTodasTabelas() {
     carregarEncadeamento();
     carregarLinear();
 }
 
 // ------------------------
-// Ler dados do estudante com validacoes
-// ------------------------
-// Acrescentado por Frederico
-void lerDadosEstudante(int *numero, char nome[], char curso[]) {
-    char numStr[MAX_STR];
-    int valido;
-    
-    printf("\n--- Dados do Estudante ---\n");
-    
-    do {
-        lerString(numStr, MAX_STR, "Numero do estudante (apenas digitos): ");
-        valido = 1;
-        
-        if(validarCampoVazio(numStr)) {
-            printf("Erro: Campo vazio! Digite novamente.\n");
-            valido = 0;
-        }
-        else if(!validarApenasDigitos(numStr)) {
-            printf("Erro: Apenas numeros sao permitidos!\n");
-            valido = 0;
-        }
-        
-    } while(!valido);
-    
-    *numero = atoi(numStr);
-    
-    do {
-        lerString(nome, MAX_NOME, "Nome do estudante (apenas letras): ");
-        valido = 1;
-        
-        if(validarCampoVazio(nome)) {
-            printf("Erro: Campo vazio! Digite novamente.\n");
-            valido = 0;
-        }
-        else if(!validarApenasLetras(nome)) {
-            printf("Erro: Apenas letras e espacos sao permitidos!\n");
-            valido = 0;
-        }
-        
-    } while(!valido);
-    
-    do {
-        lerString(curso, MAX_CURSO, "Curso do estudante (apenas letras): ");
-        valido = 1;
-        
-        if(validarCampoVazio(curso)) {
-            printf("Erro: Campo vazio! Digite novamente.\n");
-            valido = 0;
-        }
-        else if(!validarApenasLetras(curso)) {
-            printf("Erro: Apenas letras e espacos sao permitidos!\n");
-            valido = 0;
-        }
-        
-    } while(!valido);
-}
-
-// ------------------------
 // Inicializar as tabelas hash
 // ------------------------
-// Elaborado por Denilson
+// Elaborado por Denilson (Commit 1)
 void inicializarTabelas() {
     for(int i = 0; i < TAM; i++) {
         tabelaEncadeamento[i] = NULL;
@@ -1195,7 +1331,7 @@ void inicializarTabelas() {
 // ------------------------
 // Funcao hash (resto da divisao)
 // ------------------------
-// Elaborado por Denilson
+// Elaborado por Denilson (Commit 1)
 int funcaoHash(int numero) {
     return numero % TAM;
 }
@@ -1203,7 +1339,7 @@ int funcaoHash(int numero) {
 // ------------------------
 // Exibir menu principal
 // ------------------------
-// Elaborado por Denilson
+// Elaborado por Denilson (Commit 1)
 void exibirMenuPrincipal() {
     printf("\n--------------------------------------------\n");
     printf("MENU PRINCIPAL\n");
@@ -1216,73 +1352,9 @@ void exibirMenuPrincipal() {
 }
 
 // ------------------------
-// Exibir submenu (adicionado por Ludovina)
-// ------------------------
-// Acrescentado por Ludovina
-void exibirSubMenu(char titulo[]) {
-    printf("\n--------------------------------------------\n");
-    printf("%s\n", titulo);
-    printf("--------------------------------------------\n");
-    printf("1 - Encadeamento (Lista Locada)\n");
-    printf("2 - Sondagem Linear\n");
-    printf("0 - Voltar\n");
-    printf("--------------------------------------------\n");
-    printf("Escolha: ");
-}
-
-// ------------------------
-// Validar se string contem apenas digitos
-// ------------------------
-// Acrescentado por Ludovina
-int validarApenasDigitos(char str[]) {
-    for(int i = 0; str[i] != '\0'; i++) {
-        if(!isdigit(str[i])) {
-            return 0;
-        }
-    }
-    return 1;
-}
-
-// ------------------------
-// Validar se string contem apenas letras e espacos
-// ------------------------
-// Acrescentado por Ludovina
-int validarApenasLetras(char str[]) {
-    for(int i = 0; str[i] != '\0'; i++) {
-        if(!isalpha(str[i]) && str[i] != ' ') {
-            return 0;
-        }
-    }
-    return 1;
-}
-
-// ------------------------
-// Validar se campo nao esta vazio
-// ------------------------
-// Acrescentado por Ludovina
-int validarCampoVazio(char str[]) {
-    for(int i = 0; str[i] != '\0'; i++) {
-        if(str[i] != ' ' && str[i] != '\n' && str[i] != '\t') {
-            return 0;
-        }
-    }
-    return 1;
-}
-
-// ------------------------
-// Ler string com validacao simples
-// ------------------------
-// Acrescentado por Ludovina
-void lerString(char destino[], int tamanho, char mensagem[]) {
-    printf("%s", mensagem);
-    fgets(destino, tamanho, stdin);
-    destino[strcspn(destino, "\n")] = 0;
-}
-
-// ------------------------
 // Limpar buffer do teclado
 // ------------------------
-// Elaborado por Denilson
+// Elaborado por Denilson (Commit 1)
 void limparBuffer() {
     int c;
     while((c = getchar()) != '\n' && c != EOF);
@@ -1291,7 +1363,7 @@ void limparBuffer() {
 // ------------------------
 // Pausar execucao
 // ------------------------
-// Elaborado por Denilson
+// Elaborado por Denilson (Commit 1)
 void pausar() {
     printf("\nPressione Enter para continuar...");
     limparBuffer();
