@@ -9,6 +9,7 @@
  * Acrescentado por Denilson - Commit 7 (Busca Interativa)
  * Acrescentado por Denilson - Commit 8 (Persistencia em Arquivo)
  * Acrescentado por Frederico - Commit 9 (Remocao Interativa)
+ * Acrescentado por Denilson - Commit 10 (Remocao Sincronizada)
  */
 
 #include <stdio.h>
@@ -125,6 +126,15 @@ int escolherAlunoIndiceEncadeamento(int indice);
 void removerAlunoEncadeamento(int indice, int posicao);
 
 // ------------------------
+// Prototipos adicionados por Denilson (Commit 10)
+// ------------------------
+// Acrescentado por Denilson
+void removerDeAmbasTabelas(int numero);
+void removerDaTabelaEncadeamento(int numero);
+void removerDaTabelaLinear(int numero);
+int encontrarIndiceLinearPorNumero(int numero);
+
+// ------------------------
 // Funcao main - Menu principal
 // ------------------------
 // Elaborado por Denilson
@@ -150,6 +160,7 @@ int main() {
     printf("   Acrescentado por Denilson (Commit 7)\n");
     printf("   Acrescentado por Denilson (Commit 8)\n");
     printf("   Acrescentado por Frederico (Commit 9)\n");
+    printf("   Acrescentado por Denilson (Commit 10)\n");
     printf("============================================\n\n");
     
     do {
@@ -171,7 +182,7 @@ int main() {
                 
             case 3:
                 menuRemover();
-                salvarTodasTabelas();  // Salvar apos remocao
+                salvarTodasTabelas();
                 break;
                 
             case 0:
@@ -192,11 +203,95 @@ int main() {
 }
 
 // ------------------------
-// Menu de remocao de estudante
+// Remover estudante de ambas as tabelas
 // ------------------------
-// Acrescentado por Frederico
+// Acrescentado por Denilson
+void removerDeAmbasTabelas(int numero) {
+    printf("\n--- Removendo de ambas as tabelas ---\n");
+    
+    // Remover da tabela de encadeamento
+    removerDaTabelaEncadeamento(numero);
+    
+    // Remover da tabela linear
+    removerDaTabelaLinear(numero);
+    
+    printf("Estudante removido das duas tabelas com sucesso!\n");
+}
+
+// ------------------------
+// Remover estudante da tabela de encadeamento por numero
+// ------------------------
+// Acrescentado por Denilson
+void removerDaTabelaEncadeamento(int numero) {
+    int indice = funcaoHash(numero);
+    Estudante* temp = tabelaEncadeamento[indice];
+    Estudante* ant = NULL;
+    int encontrado = 0;
+    
+    while(temp != NULL) {
+        if(temp->numero == numero) {
+            encontrado = 1;
+            if(ant == NULL) {
+                tabelaEncadeamento[indice] = temp->prox;
+            } else {
+                ant->prox = temp->prox;
+            }
+            free(temp);
+            printf("  • Removido da tabela de encadeamento (indice %d)\n", indice);
+            break;
+        }
+        ant = temp;
+        temp = temp->prox;
+    }
+    
+    if(!encontrado) {
+        printf("  • Estudante nao encontrado na tabela de encadeamento\n");
+    }
+}
+
+// ------------------------
+// Remover estudante da tabela linear por numero
+// ------------------------
+// Acrescentado por Denilson
+void removerDaTabelaLinear(int numero) {
+    int indice = encontrarIndiceLinearPorNumero(numero);
+    
+    if(indice != -1) {
+        tabelaLinear[indice].numero = -1;
+        strcpy(tabelaLinear[indice].nome, "");
+        strcpy(tabelaLinear[indice].curso, "");
+        printf("  • Removido da tabela linear (indice %d)\n", indice);
+    } else {
+        printf("  • Estudante nao encontrado na tabela linear\n");
+    }
+}
+
+// ------------------------
+// Encontrar indice na tabela linear pelo numero do estudante
+// ------------------------
+// Acrescentado por Denilson
+int encontrarIndiceLinearPorNumero(int numero) {
+    int indiceOriginal = funcaoHash(numero);
+    int indice = indiceOriginal;
+    
+    do {
+        if(tabelaLinear[indice].numero == numero) {
+            return indice;
+        }
+        indice = (indice + 1) % TAM;
+    } while(indice != indiceOriginal);
+    
+    return -1;  // Nao encontrado
+}
+
+// ------------------------
+// Menu de remocao de estudante (MODIFICADO)
+// ------------------------
+// Acrescentado por Frederico (Modificado por Denilson)
 void menuRemover() {
     int opcao;
+    int numero;
+    char numStr[MAX_STR];
     
     do {
         exibirSubMenu("REMOVER ESTUDANTE");
@@ -206,14 +301,20 @@ void menuRemover() {
         switch(opcao) {
             case 1:
                 printf("\n--- Remocao por Encadeamento ---\n");
-                removerEncadeamento();
-                pausar();
+                // Mostrar tabela para escolha
+                exibirTabelaEncadeamento();
+                
+                // Escolher indice e aluno
+                removerEncadeamento();  // Esta funcao agora chama removerDeAmbasTabelas
                 break;
                 
             case 2:
                 printf("\n--- Remocao por Sondagem Linear ---\n");
-                removerLinear();
-                pausar();
+                // Mostrar tabela para escolha
+                exibirTabelaLinear();
+                
+                // Escolher indice e remover
+                removerLinear();  // Esta funcao agora chama removerDeAmbasTabelas
                 break;
                 
             case 0:
@@ -228,17 +329,13 @@ void menuRemover() {
 }
 
 // ------------------------
-// Remover estudante da tabela de encadeamento
+// Remover estudante da tabela de encadeamento (MODIFICADO)
 // ------------------------
-// Acrescentado por Frederico
+// Acrescentado por Frederico (Modificado por Denilson)
 void removerEncadeamento() {
     int indice;
     char indiceStr[MAX_STR];
     
-    // Mostrar tabela atual
-    exibirTabelaEncadeamento();
-    
-    // Pedir indice para remocao
     printf("\n--- Remocao por Encadeamento ---\n");
     printf("Digite o indice que deseja remover (0 a %d): ", TAM-1);
     
@@ -256,24 +353,92 @@ void removerEncadeamento() {
         return;
     }
     
-    // Verificar se ha alunos no indice
     if(tabelaEncadeamento[indice] == NULL) {
         printf("Nenhum aluno encontrado no indice %d.\n", indice);
         return;
     }
     
-    // Escolher qual aluno remover
     int posicao = escolherAlunoIndiceEncadeamento(indice);
     
     if(posicao > 0) {
+        // Obter o numero do estudante antes de remover
+        Estudante* temp = tabelaEncadeamento[indice];
+        for(int i = 1; i < posicao; i++) {
+            temp = temp->prox;
+        }
+        int numeroRemover = temp->numero;
+        
+        // Remover da tabela de encadeamento
         removerAlunoEncadeamento(indice, posicao);
-        printf("Aluno removido com sucesso do indice %d!\n", indice);
+        
+        // Remover tambem da tabela linear
+        removerDaTabelaLinear(numeroRemover);
+        
+        printf("\n--- Resultado da Remocao ---\n");
+        printf("Estudante removido das duas tabelas com sucesso!\n");
+    }
+}
+
+// ------------------------
+// Remover estudante da tabela de sondagem linear (MODIFICADO)
+// ------------------------
+// Acrescentado por Frederico (Modificado por Denilson)
+void removerLinear() {
+    int indice;
+    char indiceStr[MAX_STR];
+    char confirmacao;
+    
+    printf("\n--- Remocao por Sondagem Linear ---\n");
+    printf("Digite o indice que deseja remover (0 a %d): ", TAM-1);
+    
+    do {
+        lerString(indiceStr, MAX_STR, "");
+        if(!validarApenasDigitos(indiceStr)) {
+            printf("Erro: Digite apenas numeros! Tente novamente: ");
+        }
+    } while(!validarApenasDigitos(indiceStr));
+    
+    indice = atoi(indiceStr);
+    
+    if(indice < 0 || indice >= TAM) {
+        printf("Indice invalido! Deve ser entre 0 e %d.\n", TAM-1);
+        return;
+    }
+    
+    if(tabelaLinear[indice].numero == -1) {
+        printf("Nenhum aluno encontrado no indice %d.\n", indice);
+        return;
+    }
+    
+    printf("\nAluno encontrado no indice %d:\n", indice);
+    printf("  Numero: %d\n", tabelaLinear[indice].numero);
+    printf("  Nome: %s\n", tabelaLinear[indice].nome);
+    printf("  Curso: %s\n", tabelaLinear[indice].curso);
+    
+    printf("\nTem certeza que deseja remover este aluno? (s/n): ");
+    scanf("%c", &confirmacao);
+    limparBuffer();
+    
+    if(confirmacao == 's' || confirmacao == 'S') {
+        int numeroRemover = tabelaLinear[indice].numero;
+        
+        // Remover da tabela linear
+        tabelaLinear[indice].numero = -1;
+        strcpy(tabelaLinear[indice].nome, "");
+        strcpy(tabelaLinear[indice].curso, "");
+        
+        // Remover tambem da tabela de encadeamento
+        removerDaTabelaEncadeamento(numeroRemover);
+        
+        printf("\n--- Resultado da Remocao ---\n");
+        printf("Estudante removido das duas tabelas com sucesso!\n");
+    } else {
+        printf("Operacao cancelada.\n");
     }
 }
 
 // ------------------------
 // Escolher qual aluno remover de um indice no encadeamento
-// Retorna a posicao escolhida (1-based) ou 0 se cancelar
 // ------------------------
 // Acrescentado por Frederico
 int escolherAlunoIndiceEncadeamento(int indice) {
@@ -282,7 +447,6 @@ int escolherAlunoIndiceEncadeamento(int indice) {
     char escolhaStr[MAX_STR];
     int escolha;
     
-    // Contar total de alunos
     while(temp != NULL) {
         total++;
         temp = temp->prox;
@@ -292,7 +456,6 @@ int escolherAlunoIndiceEncadeamento(int indice) {
     printf("Total de alunos: %d\n", total);
     desenharLinha(50);
     
-    // Listar alunos em ordem numerica
     temp = tabelaEncadeamento[indice];
     for(int i = 1; i <= total; i++) {
         printf("%d. Numero: %d\n", i, temp->numero);
@@ -302,7 +465,6 @@ int escolherAlunoIndiceEncadeamento(int indice) {
         temp = temp->prox;
     }
     
-    // Pedir escolha
     printf("Escolha o numero do aluno que deseja remover (1 a %d, 0 para cancelar): ", total);
     
     do {
@@ -335,82 +497,20 @@ void removerAlunoEncadeamento(int indice, int posicao) {
     Estudante* temp = tabelaEncadeamento[indice];
     Estudante* ant = NULL;
     
-    // Caso especial: remover o primeiro
     if(posicao == 1) {
         tabelaEncadeamento[indice] = temp->prox;
         free(temp);
         return;
     }
     
-    // Procurar a posicao
     for(int i = 1; i < posicao; i++) {
         ant = temp;
         temp = temp->prox;
     }
     
-    // Remover o aluno
     if(ant != NULL) {
         ant->prox = temp->prox;
         free(temp);
-    }
-}
-
-// ------------------------
-// Remover estudante da tabela de sondagem linear
-// ------------------------
-// Acrescentado por Frederico
-void removerLinear() {
-    int indice;
-    char indiceStr[MAX_STR];
-    char confirmacao;
-    
-    // Mostrar tabela atual
-    exibirTabelaLinear();
-    
-    // Pedir indice para remocao
-    printf("\n--- Remocao por Sondagem Linear ---\n");
-    printf("Digite o indice que deseja remover (0 a %d): ", TAM-1);
-    
-    do {
-        lerString(indiceStr, MAX_STR, "");
-        if(!validarApenasDigitos(indiceStr)) {
-            printf("Erro: Digite apenas numeros! Tente novamente: ");
-        }
-    } while(!validarApenasDigitos(indiceStr));
-    
-    indice = atoi(indiceStr);
-    
-    if(indice < 0 || indice >= TAM) {
-        printf("Indice invalido! Deve ser entre 0 e %d.\n", TAM-1);
-        return;
-    }
-    
-    // Verificar se ha aluno no indice
-    if(tabelaLinear[indice].numero == -1) {
-        printf("Nenhum aluno encontrado no indice %d.\n", indice);
-        return;
-    }
-    
-    // Mostrar aluno que sera removido
-    printf("\nAluno encontrado no indice %d:\n", indice);
-    printf("  Numero: %d\n", tabelaLinear[indice].numero);
-    printf("  Nome: %s\n", tabelaLinear[indice].nome);
-    printf("  Curso: %s\n", tabelaLinear[indice].curso);
-    
-    // Confirmar remocao
-    printf("\nTem certeza que deseja remover este aluno? (s/n): ");
-    scanf("%c", &confirmacao);
-    limparBuffer();
-    
-    if(confirmacao == 's' || confirmacao == 'S') {
-        // Remover aluno
-        tabelaLinear[indice].numero = -1;
-        strcpy(tabelaLinear[indice].nome, "");
-        strcpy(tabelaLinear[indice].curso, "");
-        
-        printf("Aluno removido com sucesso do indice %d!\n", indice);
-    } else {
-        printf("Operacao cancelada.\n");
     }
 }
 
@@ -458,10 +558,8 @@ void procurarEncadeamento() {
     int indice;
     char indiceStr[MAX_STR];
     
-    // Mostrar tabela atual
     exibirTabelaEncadeamento();
     
-    // Pedir indice para busca
     printf("\n--- Busca por Encadeamento ---\n");
     printf("Digite o indice que deseja consultar (0 a %d): ", TAM-1);
     
@@ -479,7 +577,6 @@ void procurarEncadeamento() {
         return;
     }
     
-    // Listar alunos do indice escolhido
     listarAlunosIndiceEncadeamento(indice);
 }
 
@@ -521,10 +618,8 @@ void procurarLinear() {
     int indice;
     char indiceStr[MAX_STR];
     
-    // Mostrar tabela atual
     exibirTabelaLinear();
     
-    // Pedir indice para busca
     printf("\n--- Busca por Sondagem Linear ---\n");
     printf("Digite o indice que deseja consultar (0 a %d): ", TAM-1);
     
@@ -542,7 +637,6 @@ void procurarLinear() {
         return;
     }
     
-    // Mostrar aluno do indice escolhido
     mostrarAlunoIndiceLinear(indice);
 }
 
@@ -562,7 +656,6 @@ void mostrarAlunoIndiceLinear(int indice) {
     printf("Nome: %s\n", tabelaLinear[indice].nome);
     printf("Curso: %s\n", tabelaLinear[indice].curso);
     
-    // Verificar se houve colisao (indice diferente do calculado)
     int indiceOriginal = funcaoHash(tabelaLinear[indice].numero);
     if(indiceOriginal != indice) {
         printf("\n(Observacao: Este aluno sofreu colisao na insercao.\n");
@@ -580,15 +673,12 @@ void inserirEstudante() {
     char nome[MAX_NOME];
     char curso[MAX_CURSO];
     
-    // Ler dados do estudante
     lerDadosEstudante(&numero, nome, curso);
     
-    // Inserir automaticamente nas duas tabelas
     printf("\n--- Inserindo nas tabelas ---\n");
     inserirEncadeamento(numero, nome, curso);
     inserirLinear(numero, nome, curso);
     
-    // Mostrar como ficaram as tabelas apos insercao
     printf("\n--- Estado atual das tabelas ---\n");
     exibirTodasTabelas();
     
@@ -603,7 +693,6 @@ void inserirEncadeamento(int numero, char nome[], char curso[]) {
     int indice = funcaoHash(numero);
     Estudante* novo = (Estudante*)malloc(sizeof(Estudante));
     
-    // Preencher dados do novo estudante
     novo->numero = numero;
     strcpy(novo->nome, nome);
     strcpy(novo->curso, curso);
@@ -612,13 +701,10 @@ void inserirEncadeamento(int numero, char nome[], char curso[]) {
     printf("\n[ENCADEAMENTO] Numero: %d\n", numero);
     printf("Indice calculado: %d\n", indice);
     
-    // Verificar se o indice esta vazio
     if(tabelaEncadeamento[indice] == NULL) {
-        // Indice vazio - insercao direta
         tabelaEncadeamento[indice] = novo;
         printf("Indice %d: vazio - inserido com sucesso!\n", indice);
     } else {
-        // Indice ocupado - tratar colisao com lista locada
         exibirMensagemColisaoEncadeamento(indice);
         
         Estudante* temp = tabelaEncadeamento[indice];
@@ -655,7 +741,6 @@ void inserirLinear(int numero, char nome[], char curso[]) {
     printf("\n[LINEAR] Numero: %d\n", numero);
     printf("Indice calculado: %d\n", indiceOriginal);
     
-    // Procurar posicao vazia (sondagem linear)
     while(tabelaLinear[indice].numero != -1 && tentativas < TAM) {
         tentativas++;
         exibirMensagemColisaoLinear(indice, (indice + 1) % TAM);
@@ -668,7 +753,6 @@ void inserirLinear(int numero, char nome[], char curso[]) {
         }
     }
     
-    // Inserir na posicao encontrada
     tabelaLinear[indice].numero = numero;
     strcpy(tabelaLinear[indice].nome, nome);
     strcpy(tabelaLinear[indice].curso, curso);
@@ -918,7 +1002,6 @@ void lerDadosEstudante(int *numero, char nome[], char curso[]) {
     
     printf("\n--- Dados do Estudante ---\n");
     
-    // Ler numero (apenas digitos)
     do {
         lerString(numStr, MAX_STR, "Numero do estudante (apenas digitos): ");
         valido = 1;
@@ -936,7 +1019,6 @@ void lerDadosEstudante(int *numero, char nome[], char curso[]) {
     
     *numero = atoi(numStr);
     
-    // Ler nome (apenas letras e espacos)
     do {
         lerString(nome, MAX_NOME, "Nome do estudante (apenas letras): ");
         valido = 1;
@@ -952,7 +1034,6 @@ void lerDadosEstudante(int *numero, char nome[], char curso[]) {
         
     } while(!valido);
     
-    // Ler curso (apenas letras e espacos)
     do {
         lerString(curso, MAX_CURSO, "Curso do estudante (apenas letras): ");
         valido = 1;
@@ -967,8 +1048,6 @@ void lerDadosEstudante(int *numero, char nome[], char curso[]) {
         }
         
     } while(!valido);
-    
-    printf("\nDados validados com sucesso!\n");
 }
 
 // ------------------------
