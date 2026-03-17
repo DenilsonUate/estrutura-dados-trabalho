@@ -7,7 +7,7 @@
  * Acrescentado por Ludovina - Commit 5 (Insercao Linear)
  * Acrescentado por Frederico - Commit 6 (Exibicao das Tabelas)
  * Acrescentado por Denilson - Commit 7 (Busca Interativa)
- * Acrescentado por Denilson - Commit 8 (Persistencia em Arquivo)
+ * Acrescentado por Ludovina - Commit 8 (Persistencia em Arquivo)
  */
 
 #include <stdio.h>
