@@ -1,9 +1,7 @@
 /*
  * SISTEMA DE REGISTO DE ESTUDANTES COM TABELA HASH
- * Elaborado por Denilson
- * 
- * Este é o commit inicial que estabelece a estrutura base do sistema
- * com as duas tabelas hash (encadeamento e sondagem linear)
+ * Elaborado por Denilson - Commit 1
+ * Acrescentado por Ludovina - Commit 2 (Validações e Interface)
  */
 
 #include <stdio.h>
@@ -45,6 +43,16 @@ void limparBuffer();
 void pausar();
 
 // ------------------------
+// Protótipos adicionados por Ludovina
+// ------------------------
+// Acrescentado por Ludovina
+int validarApenasDigitos(char str[]);
+int validarApenasLetras(char str[]);
+int validarCampoVazio(char str[]);
+void lerString(char destino[], int tamanho, char mensagem[]);
+void exibirSubMenu(char titulo[]);
+
+// ------------------------
 // Função main - Menu principal
 // ------------------------
 // Elaborado por Denilson
@@ -58,7 +66,8 @@ int main() {
     printf("   SISTEMA DE REGISTO DE ESTUDANTES\n");
     printf("   Com Tabela Hash (Encadeamento e Linear)\n");
     printf("============================================\n");
-    printf("   Elaborado por Denilson - Commit 1\n");
+    printf("   Elaborado por Denilson (Commit 1)\n");
+    printf("   Acrescentado por Ludovina (Commit 2)\n");
     printf("============================================\n\n");
     
     do {
@@ -116,7 +125,7 @@ void inicializarTabelas() {
         tabelaLinear[i].numero = -1;
         strcpy(tabelaLinear[i].nome, "");
         strcpy(tabelaLinear[i].curso, "");
-        tabelaLinear[i].prox = NULL;  // Não usado na linear, mas por segurança
+        tabelaLinear[i].prox = NULL;
     }
     
     printf("Tabelas hash inicializadas com sucesso!\n");
@@ -143,6 +152,70 @@ void exibirMenuPrincipal() {
     printf("3 - Remover Estudante\n");
     printf("0 - Sair\n");
     printf("--------------------------------------------\n");
+}
+
+// ------------------------
+// Exibir submenu (adicionado por Ludovina)
+// ------------------------
+// Acrescentado por Ludovina
+void exibirSubMenu(char titulo[]) {
+    printf("\n--------------------------------------------\n");
+    printf("%s\n", titulo);
+    printf("--------------------------------------------\n");
+    printf("1 - Encadeamento (Lista Locada)\n");
+    printf("2 - Sondagem Linear\n");
+    printf("0 - Voltar\n");
+    printf("--------------------------------------------\n");
+    printf("Escolha: ");
+}
+
+// ------------------------
+// Validar se string contém apenas dígitos
+// ------------------------
+// Acrescentado por Ludovina
+int validarApenasDigitos(char str[]) {
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(!isdigit(str[i])) {
+            return 0;  // Não é dígito
+        }
+    }
+    return 1;  // São apenas dígitos
+}
+
+// ------------------------
+// Validar se string contém apenas letras e espaços
+// ------------------------
+// Acrescentado por Ludovina
+int validarApenasLetras(char str[]) {
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(!isalpha(str[i]) && str[i] != ' ') {
+            return 0;  // Não é letra nem espaço
+        }
+    }
+    return 1;  // São apenas letras e espaços
+}
+
+// ------------------------
+// Validar se campo não está vazio
+// ------------------------
+// Acrescentado por Ludovina
+int validarCampoVazio(char str[]) {
+    for(int i = 0; str[i] != '\0'; i++) {
+        if(str[i] != ' ' && str[i] != '\n' && str[i] != '\t') {
+            return 0;  // Tem caracteres não vazios
+        }
+    }
+    return 1;  // Está vazio
+}
+
+// ------------------------
+// Ler string com validação simples
+// ------------------------
+// Acrescentado por Ludovina
+void lerString(char destino[], int tamanho, char mensagem[]) {
+    printf("%s", mensagem);
+    fgets(destino, tamanho, stdin);
+    destino[strcspn(destino, "\n")] = 0;  // Remover o \n
 }
 
 // ------------------------
