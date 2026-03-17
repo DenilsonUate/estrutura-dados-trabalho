@@ -5,6 +5,7 @@
  * Acrescentado por Frederico - Commit 3 (Insercao no Menu)
  * Acrescentado por Denilson - Commit 4 (Insercao Encadeamento)
  * Acrescentado por Ludovina - Commit 5 (Insercao Linear)
+ * Acrescentado por Frederico - Commit 6 (Exibicao das Tabelas)
  */
 
 #include <stdio.h>
@@ -74,7 +75,16 @@ void exibirMensagemColisaoEncadeamento(int indice);
 // ------------------------
 // Acrescentado por Ludovina
 void inserirLinear(int numero, char nome[], char curso[]);
-void exibirMensagemColisaoLinear(int indiceOriginal, int indiceFinal);
+void exibirMensagemColisaoLinear(int indiceOcupado, int proximoIndice);
+
+// ------------------------
+// Prototipos adicionados por Frederico (Commit 6)
+// ------------------------
+// Acrescentado por Frederico
+void exibirTabelaEncadeamento();
+void exibirTabelaLinear();
+void exibirTodasTabelas();
+void desenharLinha(int tamanho);
 
 // ------------------------
 // Funcao main - Menu principal
@@ -95,6 +105,7 @@ int main() {
     printf("   Acrescentado por Frederico (Commit 3)\n");
     printf("   Acrescentado por Denilson (Commit 4)\n");
     printf("   Acrescentado por Ludovina (Commit 5)\n");
+    printf("   Acrescentado por Frederico (Commit 6)\n");
     printf("============================================\n\n");
     
     do {
@@ -152,6 +163,10 @@ void inserirEstudante() {
     printf("\n--- Inserindo nas tabelas ---\n");
     inserirEncadeamento(numero, nome, curso);
     inserirLinear(numero, nome, curso);
+    
+    // Mostrar como ficaram as tabelas apos insercao
+    printf("\n--- Estado atual das tabelas ---\n");
+    exibirTodasTabelas();
     
     pausar();
 }
@@ -251,6 +266,80 @@ void exibirMensagemColisaoLinear(int indiceOcupado, int proximoIndice) {
     printf("Indice %d ocupado, apliquei no indice %d (sondagem linear).\n", 
            indiceOcupado, proximoIndice);
     printf("----------------------------------------\n");
+}
+
+// ------------------------
+// Exibir tabela de encadeamento
+// ------------------------
+// Acrescentado por Frederico
+void exibirTabelaEncadeamento() {
+    printf("\n=== TABELA HASH - ENCADEAMENTO ===\n");
+    printf("Indice | Status | Alunos\n");
+    desenharLinha(40);
+    
+    for(int i = 0; i < TAM; i++) {
+        printf("%3d    | ", i);
+        
+        if(tabelaEncadeamento[i] == NULL) {
+            printf("Vazio   | (nenhum aluno)\n");
+        } else {
+            printf("Ocupado | ");
+            Estudante* temp = tabelaEncadeamento[i];
+            int cont = 1;
+            
+            while(temp != NULL) {
+                if(cont > 1) printf("         |         ");
+                printf("%d: %s (%s)\n", temp->numero, temp->nome, temp->curso);
+                temp = temp->prox;
+                cont++;
+            }
+        }
+        desenharLinha(40);
+    }
+}
+
+// ------------------------
+// Exibir tabela de sondagem linear
+// ------------------------
+// Acrescentado por Frederico
+void exibirTabelaLinear() {
+    printf("\n=== TABELA HASH - SONDAGEM LINEAR ===\n");
+    printf("Indice | Status   | Aluno\n");
+    desenharLinha(40);
+    
+    for(int i = 0; i < TAM; i++) {
+        printf("%3d    | ", i);
+        
+        if(tabelaLinear[i].numero == -1) {
+            printf("Vazio     | (nenhum aluno)\n");
+        } else {
+            printf("Ocupado   | %d: %s (%s)\n", 
+                   tabelaLinear[i].numero, 
+                   tabelaLinear[i].nome, 
+                   tabelaLinear[i].curso);
+        }
+        desenharLinha(40);
+    }
+}
+
+// ------------------------
+// Exibir todas as tabelas
+// ------------------------
+// Acrescentado por Frederico
+void exibirTodasTabelas() {
+    exibirTabelaEncadeamento();
+    exibirTabelaLinear();
+}
+
+// ------------------------
+// Desenhar linha separadora
+// ------------------------
+// Acrescentado por Frederico
+void desenharLinha(int tamanho) {
+    for(int i = 0; i < tamanho; i++) {
+        printf("-");
+    }
+    printf("\n");
 }
 
 // ------------------------
